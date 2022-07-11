@@ -1,92 +1,127 @@
-# Starknet Social Graph
+# ZK Social Graph
 
-StarkNet based Lens Protocol compatible social graph with ZK security features.
+## About
 
-## Getting started
+ZK Social Graph is a Web3, Lens Protocol compatible smart contracts-based social graph for the StarkNet Ecosystem designed to empower creators to own the links between themselves and their community, forming a fully composable, user-owned social graph. The protocol is built from the ground up with modularity in mind, allowing new features to be added while ensuring immutable user-owned content and social relationships.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+Our goal is to build Lens Protocol compatible StarkNet network based Social Graph and appropriate APIs enhanced with ZK security features.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Lens Protocol overview: https://docs.lens.xyz/docs 
 
-## Add your files
+## StarkNet for Social Graphs?
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+1. ZK Security
+2. L2 scaling capabilities
+3. Reduced fees
+2. Allow more people to interact / benefit from Social Graph (like Lens) ecosystem (we expect that there will be a way to use data from other chains)
+3. Speed is another big one, Polygon is actually quite slow and clogs easily
+
+## Profiles
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/zk-social-graph/starknet-social-graph.git
-git branch -M main
-git push -uf origin main
+ZK Social Graph is 100% compatible with Lens Protocol. 
 ```
 
-## Integrate with your tools
+Any address can create a profile and receive an ERC-721 ZK Social Graph Profile NFT. Profiles are represented by a ProfileStruct:
 
-- [ ] [Set up project integrations](https://gitlab.com/zk-social-graph/starknet-social-graph/-/settings/integrations)
+```
+# A struct containing profile data.
+#
+# pubCount The number of publications made to this profile.
+# followNFT The address of the followNFT associated with this profile, can be empty..
+# followModule The address of the current follow module in use by this profile, can be empty.
+# handle The profile's associated handle.
+# uri The URI to be displayed for the profile NFT.
 
-## Collaborate with your team
+struct ProfileStruct:
+    member pubCount: Unit256
+    member followNFT: felt
+    member followModule: felt
+    member handle: felt
+    member uri: felt
+end
+```
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+Profiles have a specific URI associated with them, which is meant to include metadata, such as a link to a profile picture or a display name for instance, the JSON standard for this URI is not yet determined. Profile owners can always change their follow module or profile URI.
 
-## Test and Deploy
+## Publications
 
-Use the built-in continuous integration in GitLab.
+Profile owners can `publish` to any profile they own. There are three `publication` types: `Post`, `Comment` and `Mirror`. Profile owners can also set and initialize the `Follow Module` associated with their profile.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+Publications are on-chain content created and published via profiles. Profile owners can create (publish) three publication types, outlined below. They are represented by a `PublicationStruct`:
 
-***
+```
+# A struct containing data associated with each new publication.
 
-# Editing this README
+# profileIdPointed The profile token ID this publication points to, for mirrors and comments.
+# pubIdPointed The publication ID this publication points to, for mirrors and comments.
+# contentURI The URI associated with this publication.
+# referenceModule The address of the current reference module in use by this profile, can be empty.
+# collectModule The address of the collect module associated with this publication, this exists for all publication.
+# collectNFT The address of the collectNFT associated with this publication, if any.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+struct PublicationStruct:
+    member profileIdPointed: Unit256
+    member pubIdPointed: Unit256
+    member contentURI: felt
+    member referenceModule: felt
+    member collectModule: felt
+    member collectNFT: felt
+end
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```
 
-## Name
-Choose a self-explaining name for your project.
+### Profile Interaction
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+There are two types of profile interactions: follows and collects.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+#### Follows
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Wallets can follow profiles, executing modular follow processing logic (in that profile's selected follow module) and receiving a `Follow NFT`. Each profile has a connected, unique `FollowNFT` contract, which is first deployed upon successful follow. Follow NFTs are NFTs with integrated voting and delegation capability.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+#### Collects
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+Collecting works in a modular fashion as well, every publication (except mirrors) requires a `Collect Module` to be selected and initialized. This module, similarly to follow modules, can contain any arbitrary logic to be executed upon collects. Successful collects result in a new, unique NFT being minted, essentially as a saved copy of the original publication. There is one deployed collect NFT contract per publication, and it's deployed upon the first successful collect.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+## ZK Social Graph Modularity
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Stepping back for a moment, the core concept behind modules is to allow as much freedom as possible to the community to come up with new, innovative interaction mechanisms between social graph participants. For security purposes, this is achieved by including a whitelisted list of modules controlled by governance.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+## Security and Privacy concerns
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+### Concerns
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+In the next decade, web services will evolve to become truly personal, living in more places than just user's browser, and reason over every intimate detail of our personal lives. There are examples to demonstrate this already. For example, in the past five years, the number of in-home smart assistants has grown from zero to half a billion web-connected devices. Our private lives have become a public commodity and as web services evolve to become more personal, we need to rethink how we control our data.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### Pseudonymously 
 
-## License
-For open source projects, say how it is licensed.
+... with zero knowledge verified Profile NFTs. This means user can prove credentials, ownership, or facts without them tracing back to user.
+ZK Social Graph project goal is to extend Lens Protocol with pseudonymous Profile NFT ownership (ZK badges). This means user can prove ownership of an  Profile NFT without it tracing back to him.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+#### ZK Proof
+
+In user's wallet(s), he has NFTs that can point back to his identity (aka, getting doxxed). User can verify ownership of NFTs while staying pseudonymous.
+When user connect his wallet(s), we verify his NFTs. Then, we create ZK badges out of them.
+
+https://youtu.be/_0F4QP5rJ_Q?t=3186 
+
+#### ZK badges
+
+This means user can prove ownership of an NFT without it tracing back to user.
+
+#### Building user identities (Profile NFTs) with ZK Badges
+
+Once user has ZK proof, user can add/create ZK badges for an anonymous wallet.
+Zk badges verify user owns an NFT but leaves no bread crumbs back to his personal wallets.
+
+## Milestones
+
+1. Core (upgradable proxy pattern StarkWare equivalents, settings, basic security components)
+2. Profile NFT
+3. Follow module
+4. Publication NFT
+5. Reference Module
+6. Collect Module
+7. ZK Proofs to create private profiles
+8. Indexer(s)
+9. GraphQL APIs
