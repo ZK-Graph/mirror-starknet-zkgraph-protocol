@@ -16,6 +16,8 @@ Lens Protocol overview: https://docs.lens.xyz/docs
 2. Allow more people to interact / benefit from Social Graph (like Lens) ecosystem (we expect that there will be a way to use data from other chains)
 3. Speed is another big one, Polygon is actually quite slow and clogs easily
 
+![ZK Social Graph - Overview](https://gitlab.com/zk-social-graph/starknet-social-graph/-/raw/main/assets/ZK_Social_Graph_-_Overview.png )
+
 ## Profiles
 
 ```
