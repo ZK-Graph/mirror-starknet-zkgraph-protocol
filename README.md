@@ -116,6 +116,12 @@ This means user can prove ownership of an NFT without it tracing back to user.
 Once user has ZK proof, user can add/create ZK badges for an anonymous wallet.
 Zk badges verify user owns an NFT but leaves no bread crumbs back to his personal wallets.
 
+## How to run code
+1. Setup the environment https://starknet.io/docs/quickstart.html
+2. `pip3 install cairo-nile`
+3. `nile init`
+4. `nile compile`
+
 ## Milestones
 
 1. Core (upgradable proxy pattern StarkWare equivalents, settings, basic security components)
