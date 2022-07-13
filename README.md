@@ -119,8 +119,10 @@ Zk badges verify user owns an NFT but leaves no bread crumbs back to his persona
 ## How to run code
 1. Setup the environment https://starknet.io/docs/quickstart.html
 2. `pip3 install cairo-nile`
-3. `nile init`
-4. `nile compile`
+3. `git clone https://gitlab.com/zk-graph/starknet-zkgraph-protocol`
+4. `cd starknet-zkgraph-protocol`
+5. `nile init`
+6. `nile compile`
 
 ## Milestones
 
