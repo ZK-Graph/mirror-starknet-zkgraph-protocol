@@ -8,7 +8,7 @@ from starkware.cairo.common.math import assert_not_zero, assert_nn, split_felt
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_contract_address, get_caller_address, get_block_timestamp
 
-from DataTypes import CreateProfileData, ProfileStruct
+from libraries.DataTypes import CreateProfileData, ProfileStruct
 from interfaces.IFollowModule import IFollowModule
 
 
