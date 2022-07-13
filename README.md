@@ -36,7 +36,7 @@ Any address can create a profile and receive an ERC-721 ZK Social Graph Profile 
 # uri The URI to be displayed for the profile NFT.
 
 struct ProfileStruct:
-    member pubCount: Unit256
+    member pubCount: Uint256
     member followNFT: felt
     member followModule: felt
     member handle: felt
@@ -63,8 +63,8 @@ Publications are on-chain content created and published via profiles. Profile ow
 # collectNFT The address of the collectNFT associated with this publication, if any.
 
 struct PublicationStruct:
-    member profileIdPointed: Unit256
-    member pubIdPointed: Unit256
+    member profileIdPointed: Uint256
+    member pubIdPointed: Uint256
     member contentURI: felt
     member referenceModule: felt
     member collectModule: felt
