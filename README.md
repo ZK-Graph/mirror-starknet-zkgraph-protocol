@@ -91,6 +91,8 @@ Stepping back for a moment, the core concept behind modules is to allow as much 
 
 ## Security and Privacy concerns
 
+https://gitlab.com/zk-graph/starknet-zkgraph-protocol/-/blob/main/security_overview.md 
+
 ### Concerns
 
 In the next decade, web services will evolve to become truly personal, living in more places than just user's browser, and reason over every intimate detail of our personal lives. There are examples to demonstrate this already. For example, in the past five years, the number of in-home smart assistants has grown from zero to half a billion web-connected devices. Our private lives have become a public commodity and as web services evolve to become more personal, we need to rethink how we control our data.
