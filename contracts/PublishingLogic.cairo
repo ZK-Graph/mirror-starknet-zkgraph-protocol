@@ -37,10 +37,22 @@ end
 
 @event
 func eventFollowModuleSet(
-    profileId : Uint256,
+    profileId : Uint256, # should be indexed
     followModule : felt,
     followModuleReturnData : felt,
     timestamp : felt):
+end
+
+@event
+func eventPostCreated(
+        profileId : Uint256, # should be indexed
+        pubId : Uint256, # should be indexed
+        contentURI : felt, # string
+        collectModule : felt, # address
+        collectModuleReturnData : felt, # bytes
+        referenceModule : felt, # address
+        referenceModuleReturnData : felt, # bytes
+        timestamp : felt):
 end
 
 
