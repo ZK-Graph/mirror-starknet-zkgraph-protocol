@@ -83,7 +83,7 @@ func felt_to_uint256{range_check_ptr}(x) -> (x_ : Uint256):
 end
 
 
-func createProfile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+func createProfile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
     }(vars : CreateProfileData, profileId : Uint256, _profileIdByHandleHash : felt, _profileById : ProfileStruct, _followModuleWhitelisted : felt
     ) -> ():
     alloc_locals
