@@ -23,22 +23,25 @@ func profileById(profileId : Uint256) -> (profileStruct : ProfileStruct):
 end
 
 @event
-func emitProfileCreated(profileId : Uint256, sender : felt, to : felt, handle : felt, imageURI : felt, followModule : felt, followModuleReturnData : felt, followNFTURI : felt, time : felt):
+func emitProfileCreated(
+    profileId : Uint256, 
+    sender : felt, 
+    to : felt, 
+    handle : felt, 
+    imageURI : felt, 
+    followModule : felt, 
+    followModuleReturnData : felt, 
+    followNFTURI : felt, 
+    time : felt):
 end
 
-#@view
-#func view_get_keccak_hash{
-#    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-#}(value_to_hash : felt) -> (hashed_value : Uint256):
-#    alloc_locals
-#    let (local keccak_ptr_start) = alloc()
-#    let keccak_ptr = keccak_ptr_start
-#    let (local arr : felt*) = alloc()
-#    assert arr[0] = value_to_hash
-#    let (hashed_value) = keccak_felts{keccak_ptr=keccak_ptr}(1, arr)
-#    finalize_keccak(keccak_ptr_start=keccak_ptr_start, keccak_ptr_end=keccak_ptr)
-#    return (hashed_value)
-#end
+@event
+func eventFollowModuleSet(
+    profileId : Uint256,
+    followModule : felt,
+    followModuleReturnData : felt,
+    timestamp : felt):
+end
 
 
 func uint256_to_address_felt(x : Uint256) -> (address : felt):
@@ -54,9 +57,6 @@ end
 func createProfile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(vars : CreateProfileData, profileId : Uint256, _profileIdByHandleHash : felt, _profileById : ProfileStruct, _followModuleWhitelisted : felt, handleHash : Uint256
     ) -> ():
-    ### remove handleHash from args ###
-    #let handleHash = keccak(&vars.handle, 32)
-    #let (handleHash) = view_get_keccak_hash(vars.handle)
     alloc_locals
     with_attr error_message("Profile ID by Handle Hash != 0"):
 	let (profileIdByHandleHash : Uint256) = profile_id_by_hh_storage.read(handleHash)
@@ -66,31 +66,27 @@ func createProfile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     end
 
     profile_id_by_hh_storage.write(handleHash, profileId)
-#    struct profileTemp:
-#        member pubCount : Uint256
-#        member followModule : felt
-#        member followNFT : felt
-#        member handle : felt
-#        member imageURI : felt
-#        member followNFTURI : felt
-#    end
+
     let (pubCount : Uint256) = felt_to_uint256(0)
     let (local struct_array : ProfileStruct*) = alloc()
     assert struct_array[0] = ProfileStruct(pubCount=pubCount, followModule=vars.followModule, followNFT=0, handle=vars.handle, imageURI=vars.imageURI, followNFTURI=vars.followNFTURI)
-#    let (profileTemp : ProfileStruct) = struct_array[0]
-#    let (profileTemp : ProfileStruct) = alloc()
-#    profileTemp.handle = vars.handle
-#    profileTemp.imageURI = vars.imageURI
-#    profileTemp.followNFTURI = vars.followNFTURI
 
-#    if vars.followModule != "0x0"
-#    profileTemp.followModule = vars.followModule
 
     let (followModuleReturnData) = _initFollowModule(profileId, vars.followModule, vars.followModuleInitData, _followModuleWhitelisted)
-#   end
+
 
     profileById.write(profileId, struct_array[0])
     _emitProfileCreated(profileId, vars, followModuleReturnData)
+    return ()
+end
+
+
+func setFollowModule{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+    }(profileId : Uint256, followModule : felt, followModuleInitData : felt, _profile : ProfileStruct, _followModuleWhitelisted : felt) -> ():
+    let (followModuleReturnData) = _initFollowModule(profileId, followModule, followModuleInitData, _followModuleWhitelisted)
+
+    let (block_timestamp) = get_block_timestamp()
+    eventFollowModuleSet.emit(profileId, followModule, followModuleReturnData, block_timestamp)
     return ()
 end
 
