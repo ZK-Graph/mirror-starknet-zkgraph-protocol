@@ -56,6 +56,23 @@ func eventPostCreated(
 end
 
 
+func get_keccak_hash{
+    syscall_ptr : felt*,
+    pedersen_ptr : HashBuiltin*,
+    range_check_ptr,
+    bitwise_ptr : BitwiseBuiltin*
+    }(value_to_hash : felt) -> (hashed_value : Uint256):
+    alloc_locals
+    let (local keccak_ptr_start) = alloc()
+    let keccak_ptr = keccak_ptr_start
+    let (local arr : felt*) = alloc()
+    assert arr[0] = value_to_hash
+    let (hashed_value) = keccak_felts{keccak_ptr=keccak_ptr}(1, arr)
+    finalize_keccak(keccak_ptr_start=keccak_ptr_start, keccak_ptr_end=keccak_ptr)
+    return (hashed_value)
+end
+
+
 func uint256_to_address_felt(x : Uint256) -> (address : felt):
     return (x.low + x.high * 2 ** 128)
 end
@@ -67,29 +84,32 @@ end
 
 
 func createProfile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(vars : CreateProfileData, profileId : Uint256, _profileIdByHandleHash : felt, _profileById : ProfileStruct, _followModuleWhitelisted : felt, handleHash : Uint256
+    }(vars : CreateProfileData, profileId : Uint256, _profileIdByHandleHash : felt, _profileById : ProfileStruct, _followModuleWhitelisted : felt
     ) -> ():
     alloc_locals
+    let (handleHash) = get_keccak_hash(vars.handle)
     with_attr error_message("Profile ID by Handle Hash != 0"):
-	let (profileIdByHandleHash : Uint256) = profile_id_by_hh_storage.read(handleHash)
-	let (profileIdFelt : felt) = uint256_to_address_felt(profileIdByHandleHash)
-	assert_not_zero(profileIdFelt)
-	
+	    let (profileIdByHandleHash : Uint256) = profile_id_by_hh_storage.read(handleHash)
+	    let (profileIdFelt : felt) = uint256_to_address_felt(profileIdByHandleHash)
+	    assert_not_zero(profileIdFelt)
     end
 
     profile_id_by_hh_storage.write(handleHash, profileId)
 
     let (pubCount : Uint256) = felt_to_uint256(0)
     let (local struct_array : ProfileStruct*) = alloc()
-    assert struct_array[0] = ProfileStruct(pubCount=pubCount, followModule=vars.followModule, followNFT=0, handle=vars.handle, imageURI=vars.imageURI, followNFTURI=vars.followNFTURI)
 
-
-    let (followModuleReturnData) = _initFollowModule(profileId, vars.followModule, vars.followModuleInitData, _followModuleWhitelisted)
-
-
-    profileById.write(profileId, struct_array[0])
-    _emitProfileCreated(profileId, vars, followModuleReturnData)
-    return ()
+    if vars.followModule != 0:
+        assert struct_array[0] = ProfileStruct(pubCount=pubCount, followModule=vars.followModule, followNFT=0, handle=vars.handle, imageURI=vars.imageURI, followNFTURI=vars.followNFTURI)
+        let (followModuleReturnData) = _initFollowModule(profileId, vars.followModule, vars.followModuleInitData, _followModuleWhitelisted)
+        profileById.write(profileId, struct_array[0])
+        _emitProfileCreated(profileId, vars, followModuleReturnData)
+        return ()
+    else:
+        assert struct_array[0] = ProfileStruct(pubCount=pubCount, followModule=0, followNFT=0, handle=vars.handle, imageURI=vars.imageURI, followNFTURI=vars.followNFTURI)
+        profileById.write(profileId, struct_array[0])
+        return ()
+    end
 end
 
 
