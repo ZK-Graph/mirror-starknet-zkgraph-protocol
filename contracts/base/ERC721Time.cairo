@@ -148,7 +148,30 @@ namespace ERC721Time:
 	    pedersen_ptr: HashBuiltin*,
 	    range_check_ptr
 	}(token_id: Uint256) -> (timestamp: felt):
-	    
+        with_attr error_message("ERC721: token_id is not a valid Uint256"):
+            uint256_check(token_id)
+        end
+	let (mint_timestamp) = ERC721_token_data.read(token_id).mint_timestamp
+        with_attr error_message("ERC721: mint timestamp query for nonexistent token"):
+	    assert_not_zero(mint_timestamp)
+	end
+	return (mint_timestamp)
+    end
+
+    func token_data_of{
+            syscall_ptr: felt*,
+            pedersen_ptr: HashBuiltin*,
+            range_check_ptr
+        }(token_id: Uint256) -> (_token_data: DataTypes.TokenData):
+        with_attr error_message("ERC721: token_id is not a valid Uint256"):
+            uint256_check(token_id)
+        end
+	let (token_data) = ERC721_token_data.read(token_id)
+	let (exists) = _exists(token_id)
+	with_attr error_message("ERC721: token data query for nonexistent token"):
+	    assert exists = TRUE
+	end
+	return (token_data)
     end
 
     func get_approved{
