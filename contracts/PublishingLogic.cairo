@@ -8,10 +8,13 @@ from starkware.cairo.common.math import assert_not_zero, assert_nn, split_felt
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_contract_address, get_caller_address, get_block_timestamp
 
-from libraries.DataTypes import CreateProfileData, ProfileStruct
+from libraries.DataTypes import DataTypes
 from interfaces.IFollowModule import IFollowModule
 
 
+# 
+# Storage
+#
 
 @storage_var
 func profile_id_by_hh_storage(handle : Uint256) -> (profile_id_by_hh_storage : Uint256):
@@ -19,43 +22,49 @@ end
 
 
 @storage_var
-func profileById(profileId : Uint256) -> (profileStruct : ProfileStruct):
+func profile_by_id(profile_id : Uint256) -> (profileStruct : DataTypes.ProfileStruct):
 end
 
+#
+# Events
+#
+
 @event
-func emitProfileCreated(
-    profileId : Uint256, 
+func event_profile_created(
+    profile_id : Uint256, 
     sender : felt, 
     to : felt, 
     handle : felt, 
-    imageURI : felt, 
-    followModule : felt, 
-    followModuleReturnData : felt, 
-    followNFTURI : felt, 
-    time : felt):
-end
-
-@event
-func eventFollowModuleSet(
-    profileId : Uint256, # should be indexed
-    followModule : felt,
-    followModuleReturnData : felt,
+    image_uri : felt, 
+    follow_module : felt, 
+    follow_module_return_data : felt, 
+    follow_nft_uri : felt, 
     timestamp : felt):
 end
 
 @event
-func eventPostCreated(
-        profileId : Uint256, # should be indexed
-        pubId : Uint256, # should be indexed
-        contentURI : felt, # string
-        collectModule : felt, # address
-        collectModuleReturnData : felt, # bytes
-        referenceModule : felt, # address
-        referenceModuleReturnData : felt, # bytes
+func event_follow_module_set(
+    profile_id : Uint256, # should be indexed
+    follow_module : felt,
+    follow_module_return_data : felt,
+    timestamp : felt):
+end
+
+@event
+func event_post_created(
+        profile_id : Uint256, # should be indexed
+        pub_id : Uint256, # should be indexed
+        content_uri : felt, # string
+        collect_module : felt, # address
+        collect_module_return_data : felt, # bytes
+        reference_module : felt, # address
+        reference_module_return_data : felt, # bytes
         timestamp : felt):
 end
 
-
+#
+# Internal
+#
 func get_keccak_hash{
     syscall_ptr : felt*,
     pedersen_ptr : HashBuiltin*,
@@ -83,63 +92,63 @@ func felt_to_uint256{range_check_ptr}(x) -> (x_ : Uint256):
 end
 
 
-func createProfile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-    }(vars : CreateProfileData, profileId : Uint256, _profileIdByHandleHash : felt, _profileById : ProfileStruct, _followModuleWhitelisted : felt
+func create_profile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+    }(vars : DataTypes.CreateProfileData, profile_id : Uint256, _profile_id_by_handle_hash : felt, _profile_by_id : DataTypes.ProfileStruct, _follow_module_whitelisted : felt
     ) -> ():
     alloc_locals
-    let (handleHash) = get_keccak_hash(vars.handle)
+    let (handle_hash) = get_keccak_hash(vars.handle)
     with_attr error_message("Profile ID by Handle Hash != 0"):
-	    let (profileIdByHandleHash : Uint256) = profile_id_by_hh_storage.read(handleHash)
-	    let (profileIdFelt : felt) = uint256_to_address_felt(profileIdByHandleHash)
-	    assert_not_zero(profileIdFelt)
+	    let (profile_id_by_handle_hash : Uint256) = profile_id_by_hh_storage.read(handle_hash)
+	    let (profile_id_felt : felt) = uint256_to_address_felt(profile_id_by_handle_hash)
+	    assert_not_zero(profile_id_felt)
     end
 
-    profile_id_by_hh_storage.write(handleHash, profileId)
+    profile_id_by_hh_storage.write(handle_hash, profile_id)
 
-    let (pubCount : Uint256) = felt_to_uint256(0)
-    let (local struct_array : ProfileStruct*) = alloc()
+    let (pub_count : Uint256) = felt_to_uint256(0)
+    let (local struct_array : DataTypes.ProfileStruct*) = alloc()
 
-    if vars.followModule != 0:
-        assert struct_array[0] = ProfileStruct(pubCount=pubCount, followModule=vars.followModule, followNFT=0, handle=vars.handle, imageURI=vars.imageURI, followNFTURI=vars.followNFTURI)
-        let (followModuleReturnData) = _initFollowModule(profileId, vars.followModule, vars.followModuleInitData, _followModuleWhitelisted)
-        profileById.write(profileId, struct_array[0])
-        _emitProfileCreated(profileId, vars, followModuleReturnData)
+    if vars.follow_module != 0:
+        assert struct_array[0] = DataTypes.ProfileStruct(pub_count=pub_count, follow_module=vars.follow_module, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
+        let (follow_module_return_data) = _init_follow_module(profile_id, vars.follow_module, vars.follow_module_init_data, _follow_module_whitelisted)
+        profile_by_id.write(profile_id, struct_array[0])
+        _emit_profile_created(profile_id, vars, follow_module_return_data)
         return ()
     else:
-        assert struct_array[0] = ProfileStruct(pubCount=pubCount, followModule=0, followNFT=0, handle=vars.handle, imageURI=vars.imageURI, followNFTURI=vars.followNFTURI)
-        profileById.write(profileId, struct_array[0])
+        assert struct_array[0] = DataTypes.ProfileStruct(pub_count=pub_count, follow_module=0, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
+        profile_by_id.write(profile_id, struct_array[0])
         return ()
     end
 end
 
 
-func setFollowModule{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(profileId : Uint256, followModule : felt, followModuleInitData : felt, _profile : ProfileStruct, _followModuleWhitelisted : felt) -> ():
-    let (followModuleReturnData) = _initFollowModule(profileId, followModule, followModuleInitData, _followModuleWhitelisted)
+func set_follow_module{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+    }(profile_id : Uint256, follow_module : felt, follow_module_init_data : felt, _profile : DataTypes.ProfileStruct, _follow_module_whitelisted : felt) -> ():
+    let (follow_module_return_data) = _init_follow_module(profile_id, follow_module, follow_module_init_data, _follow_module_whitelisted)
 
     let (block_timestamp) = get_block_timestamp()
-    eventFollowModuleSet.emit(profileId, followModule, followModuleReturnData, block_timestamp)
+    event_follow_module_set.emit(profile_id, follow_module, follow_module_return_data, block_timestamp)
     return ()
 end
 
 
-func _initFollowModule{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(profileId : Uint256, _followModule : felt, _followModuleInitData : felt, _followModuleWhitelisted : felt
+func _init_follow_module{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+    }(profile_id : Uint256, _follow_module : felt, _follow_module_init_data : felt, _follow_module_whitelisted : felt
     ) -> (mem : felt):
     with_attr error_message("Follow module not whitelisted"):
-        assert_nn(_followModuleWhitelisted)
+        assert_nn(_follow_module_whitelisted)
     end
     let (sender) = get_caller_address()
-    let ( retval : felt ) = IFollowModule.initializeFollowModule(sender, profileId, _followModuleInitData)
+    let ( retval : felt ) = IFollowModule.initialize_follow_module(sender, profile_id, _follow_module_init_data)
     return (retval)
 end
 
 
-func _emitProfileCreated{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(profileId : Uint256, vars : CreateProfileData, _followModuleReturnData
+func _emit_profile_created{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+    }(profile_id : Uint256, vars : DataTypes.CreateProfileData, _follow_module_return_data
     ) -> ():
     let (sender_address) = get_caller_address()
     let (block_timestamp) = get_block_timestamp()
-    emitProfileCreated.emit(profileId, sender_address, vars.to, vars.handle, vars.imageURI, vars.followModule, _followModuleReturnData, vars.followNFTURI, block_timestamp)
+    event_profile_created.emit(profile_id, sender_address, vars.to, vars.handle, vars.image_uri, vars.follow_module, _follow_module_return_data, vars.follow_nft_uri, block_timestamp)
     return ()
 end

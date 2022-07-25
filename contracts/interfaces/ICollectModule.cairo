@@ -13,9 +13,9 @@ namespace ICollectModule:
     # *
     # * @return bytes An abi encoded byte array encapsulating the execution's state changes. This will be emitted by the
     # * hub alongside the collect module's address and should be consumed by front ends.
-    func initializePublicationCollectModule(
-        profileId : Uint256,
-        pubId : Uint256,
+    func initialize_publication_collect_module(
+        profile_id : Uint256,
+        pub_id : Uint256,
         data : felt) -> (retval : felt):
     end
 
@@ -27,11 +27,11 @@ namespace ICollectModule:
     # * @param profileId The token ID of the profile associated with the publication being collected.
     # * @param pubId The LensHub publication ID associated with the publication being collected.
     # * @param data Arbitrary data __passed from the collector!__ to be decoded.
-    func processCollect(
-        referrerProfileId : Uint256,
+    func process_collect(
+        referrer_profile_id : Uint256,
         collector : felt,
-        profileId : Uint256,
-        pubId : Uint256,
+        profile_id : Uint256,
+        pub_id : Uint256,
         data : felt):
     end
 end
