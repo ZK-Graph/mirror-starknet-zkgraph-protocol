@@ -18,7 +18,7 @@ from openzeppelin.utils.constants.library import (
 )
 
 from libraries.DataTypes import DataTypes
-from base.IERC721Time import IERC721Time
+from core.base.IERC721Time import IERC721Time
 
 #
 # Events
@@ -442,11 +442,10 @@ namespace ERC721Time:
         ERC721_balances.write(to, new_balance)
 
         # Update token_id owner
-	let (token_data : DataTypes.TokenData) = ERC721_token_data.read(token_id)
-	let (timestamp : felt) = token_data.mint_timestamp
-	let (new_token_data : DataTypes.TokenData) = DataTypes.TokenData(owner=to, mint_timestamp=timestamp)
-	ERC721_token_data.write(token_id, new_token_data)
-#        ERC721_owners.write(token_id, to)
+        let (token_data : DataTypes.TokenData) = ERC721_token_data.read(token_id)
+        let (timestamp : felt) = token_data.mint_timestamp
+        let (new_token_data : DataTypes.TokenData) = DataTypes.TokenData(owner=to, mint_timestamp=timestamp)
+        ERC721_token_data.write(token_id, new_token_data)
         Transfer.emit(from_, to, token_id)
         return ()
     end
@@ -493,9 +492,8 @@ namespace ERC721Time:
         let (new_balance: Uint256) = SafeUint256.add(balance, Uint256(1, 0))
         ERC721_balances.write(to, new_balance)
         let (timestamp : felt) = get_block_timestamp()
-	let (new_token_data : DataTypes.TokenData) = DataTypes.TokenData(owner=to, mint_timestamp=timestamp)
+	    let (new_token_data : DataTypes.TokenData) = DataTypes.TokenData(owner=to, mint_timestamp=timestamp)
         ERC721_token_data.write(token_id, new_token_data)
-#        ERC721_owners.write(token_id, to)
         Transfer.emit(0, to, token_id)
         return ()
     end
@@ -552,7 +550,6 @@ namespace ERC721Time:
         let (timestamp : felt) = token_data.mint_timestamp
         let (new_token_data : DataTypes.TokenData) = DataTypes.TokenData(owner=0, mint_timestamp=timestamp)
         ERC721_token_data.write(token_id, new_token_data)
-#        ERC721_owners.write(token_id, 0)
         Transfer.emit(owner, 0, token_id)
         return ()
     end
