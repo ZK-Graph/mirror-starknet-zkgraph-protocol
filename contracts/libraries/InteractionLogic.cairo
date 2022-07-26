@@ -10,3 +10,15 @@ from starkware.starknet.common.syscalls import get_contract_address, get_caller_
 
 from libraries.DataTypes import DataTypes
 from interfaces.IFollowModule import IFollowModule
+
+#
+# Events
+#
+
+@event
+func Followed(
+    follower : felt,
+    profile_ids : Uint256*,
+    folow_module_datas : felt*,
+    timestamp : felt
+end
