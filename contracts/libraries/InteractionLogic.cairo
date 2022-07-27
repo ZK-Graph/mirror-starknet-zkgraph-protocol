@@ -32,8 +32,8 @@ from libraries.PublishingLogic import get_profile_by_id, get_profile_by_hh
 @event
 func Followed(
     follower : felt,
-    profile_ids : Uint256*,
-    folow_module_datas : felt*,
+    profile_id : Uint256,
+    folow_module_data : felt,
     timestamp : felt
 end
 
