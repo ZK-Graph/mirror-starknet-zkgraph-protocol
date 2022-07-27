@@ -17,13 +17,15 @@ from interfaces.IFollowModule import IFollowModule
 #
 
 @storage_var
-func profile_id_by_hh_storage(handle : Uint256) -> (profile_id_by_hh_storage : Uint256):
+func profile_id_by_hh_storage(handle_hash : felt) -> (profile_id : Uint256):
 end
 
 
 @storage_var
 func profile_by_id(profile_id : Uint256) -> (profileStruct : DataTypes.ProfileStruct):
 end
+
+
 
 #
 # Events
@@ -61,6 +63,34 @@ func event_post_created(
         reference_module_return_data : felt, # bytes
         timestamp : felt):
 end
+
+#
+# Getters
+#
+@view
+func get_profile_by_id{
+    syscall_ptr : felt*,
+    pedersen_ptr : HashBuiltin*,
+    range_check_ptr
+    }(profile_id : Uint256) -> (profile : DataTypes.ProfileStruct):
+
+    let (profile : DataTypes.ProfileStruct) = profile_by_id.read(profile_id)
+
+    return (profile)
+end
+
+@view
+func get_profile_by_hh{
+    syscall_ptr : felt*,
+    pedersen_ptr : HashBuiltin*,
+    range_check_ptr
+    }(handle_hash : felt) -> (profile_id : Uint256):
+
+    let (profile_id : Uint256) = profile_id_by_hh_storage.read(handle_hash)
+
+    return (profile_id)
+end
+
 
 #
 # Internal
