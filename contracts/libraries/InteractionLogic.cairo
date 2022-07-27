@@ -34,7 +34,7 @@ func Followed(
     follower : felt,
     profile_id : Uint256,
     folow_module_data : felt,
-    timestamp : felt
+    timestamp : felt):
 end
 
 #  * @dev Emitted upon a successful collect action.
@@ -68,7 +68,7 @@ end
 func FollowNFTDeployed(
     profile_id : felt,
     follow_nft : felt,
-    timestamp : felt
+    timestamp : felt):
 end
 
 #  * @dev Emitted when a collectNFT clone is deployed using a lazy deployment pattern.
@@ -83,7 +83,7 @@ end
 #     profile_id : Uint256,
 #     pub_id : Uint256,
 #     collect_nft : felt,
-#     timestamp : felt
+#     timestamp : felt):
 # end
 
 # 
@@ -124,14 +124,9 @@ end
 func follow{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
     }(follower : felt, profile_id : Uint256, follow_module_data : felt) -> (retval : Uint256*):
     alloc_locals
-
-    # with_attr error_message("Profile IDs and Follow Module Array lengths mismatch"):
-    #     assert profile_ids_lengths = follow_module_datas_lengths
-    # end
-
-    # keccak256 - Ilyas knows ;)
     let (profile : DataTypes.ProfileStruct) = get_profile_by_id(profile_id)
-
+    
+    # Cannot unpack profile... Code doesn't compile. Need to change the way receiving members of data struct
     let (handle : felt) = profile.handle
     
     let (handle_hash : felt) = get_keccak_hash(handle)

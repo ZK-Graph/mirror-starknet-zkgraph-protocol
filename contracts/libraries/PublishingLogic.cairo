@@ -17,7 +17,7 @@ from interfaces.IFollowModule import IFollowModule
 #
 
 @storage_var
-func profile_id_by_hh_storage(handle_hash : felt) -> (profile_id : Uint256):
+func profile_id_by_hh_storage(handle : felt) -> (profile_id : Uint256):
 end
 
 
@@ -25,14 +25,16 @@ end
 func profile_by_id(profile_id : Uint256) -> (profileStruct : DataTypes.ProfileStruct):
 end
 
-
+@storage_var
+func pub_id_by_profile(profile_id : Uint256) -> (retval : DataTypes.PublicationStruct):
+end
 
 #
 # Events
 #
 
 @event
-func event_profile_created(
+func ProfileCreated(
     profile_id : Uint256, 
     sender : felt, 
     to : felt, 
@@ -45,7 +47,7 @@ func event_profile_created(
 end
 
 @event
-func event_follow_module_set(
+func FollowModuleSet(
     profile_id : Uint256, # should be indexed
     follow_module : felt,
     follow_module_return_data : felt,
@@ -53,14 +55,10 @@ func event_follow_module_set(
 end
 
 @event
-func event_post_created(
+func PostCreated(
         profile_id : Uint256, # should be indexed
         pub_id : Uint256, # should be indexed
         content_uri : felt, # string
-        collect_module : felt, # address
-        collect_module_return_data : felt, # bytes
-        reference_module : felt, # address
-        reference_module_return_data : felt, # bytes
         timestamp : felt):
 end
 
@@ -90,7 +88,6 @@ func get_profile_by_hh{
 
     return (profile_id)
 end
-
 
 #
 # Internal
@@ -123,17 +120,18 @@ end
 
 
 func create_profile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-    }(vars : DataTypes.CreateProfileData, profile_id : Uint256, _profile_id_by_handle_hash : felt, _profile_by_id : DataTypes.ProfileStruct, _follow_module_whitelisted : felt
+    }(vars : DataTypes.CreateProfileData, profile_id : Uint256, _follow_module_whitelisted : felt
     ) -> ():
     alloc_locals
     let (handle_hash) = get_keccak_hash(vars.handle)
+    let (handle_hash_felt) = uint256_to_address_felt(handle_hash)
     with_attr error_message("Profile ID by Handle Hash != 0"):
-	    let (profile_id_by_handle_hash : Uint256) = profile_id_by_hh_storage.read(handle_hash)
+	    let (profile_id_by_handle_hash : Uint256) = profile_id_by_hh_storage.read(handle_hash_felt)
 	    let (profile_id_felt : felt) = uint256_to_address_felt(profile_id_by_handle_hash)
 	    assert_not_zero(profile_id_felt)
     end
 
-    profile_id_by_hh_storage.write(handle_hash, profile_id)
+    profile_id_by_hh_storage.write(handle_hash_felt, profile_id)
 
     let (pub_count : Uint256) = felt_to_uint256(0)
     let (local struct_array : DataTypes.ProfileStruct*) = alloc()
@@ -152,12 +150,27 @@ func create_profile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
 end
 
 
+func create_post{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+    }(profile_id : Uint256, content_uri : felt, pub_id : Uint256, _pub_id_by_profile : felt
+    ) -> ():
+    alloc_locals
+    let (local struct_array : DataTypes.PublicationStruct*) = alloc()
+
+    
+    assert struct_array[0] = DataTypes.PublicationStruct(profile_id_pointed=profile_id, pub_id_pointed=pub_id, content_uri=content_uri)
+    pub_id_by_profile.write(profile_id, struct_array[0])
+    let (timestamp : felt) = get_block_timestamp()
+    PostCreated.emit(profile_id, pub_id, content_uri, timestamp)
+    return ()
+end
+
+
 func set_follow_module{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(profile_id : Uint256, follow_module : felt, follow_module_init_data : felt, _profile : DataTypes.ProfileStruct, _follow_module_whitelisted : felt) -> ():
     let (follow_module_return_data) = _init_follow_module(profile_id, follow_module, follow_module_init_data, _follow_module_whitelisted)
 
     let (block_timestamp) = get_block_timestamp()
-    event_follow_module_set.emit(profile_id, follow_module, follow_module_return_data, block_timestamp)
+    FollowModuleSet.emit(profile_id, follow_module, follow_module_return_data, block_timestamp)
     return ()
 end
 
@@ -179,6 +192,6 @@ func _emit_profile_created{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     ) -> ():
     let (sender_address) = get_caller_address()
     let (block_timestamp) = get_block_timestamp()
-    event_profile_created.emit(profile_id, sender_address, vars.to, vars.handle, vars.image_uri, vars.follow_module, _follow_module_return_data, vars.follow_nft_uri, block_timestamp)
+    ProfileCreated.emit(profile_id, sender_address, vars.to, vars.handle, vars.image_uri, vars.follow_module, _follow_module_return_data, vars.follow_nft_uri, block_timestamp)
     return ()
 end
