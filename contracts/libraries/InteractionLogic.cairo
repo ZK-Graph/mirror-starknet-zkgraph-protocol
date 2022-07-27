@@ -12,7 +12,7 @@ from libraries.DataTypes import DataTypes
 from interfaces.IFollowModule import IFollowModule
 from interfaces.IFollowNFT import IFollowNFT
 
-from libraries.PublishingLogic import get_profile_by_id, get_profile_by_hh
+from libraries.PublishingLogic import get_profile_by_id, get_profile_by_hh, get_profile_el_by_id
 
 #to be refactored. For MVP/Demo purposes we are about to use Only Dust Stream library 
 #from onlydust.stream.default_implementation import stream
@@ -118,28 +118,31 @@ func get_keccak_hash{
     return (hashed_value)
 end
 
+func uint256_to_felt(x : Uint256) -> (address : felt):
+    return (x.low + x.high * 2 ** 128)
+end
+
 
 #to be refactored. For MVP/Demo purposes we are about to use Only Dust Stream library  
 
 func follow{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-    }(follower : felt, profile_id : Uint256, follow_module_data : felt) -> (retval : Uint256*):
+    }(follower : felt, profile_id : Uint256, follow_module_data : felt) -> (retval : Uint256):
+    
     alloc_locals
-    let (profile : DataTypes.ProfileStruct) = get_profile_by_id(profile_id)
+    let (handle : felt) = get_profile_el_by_id(profile_id, 0)
     
-    # Cannot unpack profile... Code doesn't compile. Need to change the way receiving members of data struct
-    let (handle : felt) = profile.handle
-    
-    let (handle_hash : felt) = get_keccak_hash(handle)
-    let (profile_id_by_hh : Uint256) = get_profile_by_hh(handle_hash)
+    let (handle_hash : Uint256) = get_keccak_hash(handle)
+    let (handle_hash_felt : felt) = uint256_to_felt(handle_hash)
+    let (profile_id_by_hh : Uint256) = get_profile_by_hh(handle_hash_felt)
     
 
     with_attr error_message("Profile ID by Handle Hash != 0"):
 	    assert profile_id = profile_id_by_hh
     end
 
-    let (follow_module : felt) = profile.follow_module
+    let (follow_module : felt) = get_profile_el_by_id(profile_id, 1)
 
-    let (follow_nft : felt) = profile.follow_nft
+    let (follow_nft : felt) = get_profile_el_by_id(profile_id, 2)
 
     #     # we cannot use following approach as we need to write whole structure
     #     # ideally deploy Follow NFT with Profile NFT
@@ -150,16 +153,22 @@ func follow{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, b
     #     # ideally deploy Follow NFT with Profile NFT
     #     # profile_by_id.write(profile_id, follow_nft)
     # end
-
-    let (follow_token_id : Uint256) = IFollowNFT.mint(follower)
+    let (sender) = get_caller_address()
+    let (follow_token_id : Uint256) = IFollowNFT.mint(sender, follower)
 
     if follow_module != 0:
-        IFollowModule.process_follow(follower, profile_id, follow_module_data)
+        IFollowModule.process_follow(sender, follower, profile_id, follow_module_data)
+        # Read Revoked implicit arguments https://starknet.io/docs/how_cairo_works/builtins.html
+	tempvar syscall_ptr = syscall_ptr
+	tempvar range_check_ptr = range_check_ptr
+    else:
+	tempvar syscall_ptr = syscall_ptr
+	tempvar range_check_ptr = range_check_ptr
     end
 
-    let (timestamp : felt) = get_block_timestamp()
     # Emit
 
+    let (timestamp : felt) = get_block_timestamp()
     Followed.emit(follower, profile_id, follow_module_data, timestamp)
 
     # Return

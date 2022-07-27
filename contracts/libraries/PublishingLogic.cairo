@@ -78,6 +78,25 @@ func get_profile_by_id{
 end
 
 @view
+func get_profile_el_by_id{
+    syscall_ptr : felt*,
+    pedersen_ptr : HashBuiltin*,
+    range_check_ptr
+    }(profile_id : Uint256, el : felt) -> (profile : felt):
+    let (profile : DataTypes.ProfileStruct) = profile_by_id.read(profile_id)
+    if el == 0:
+        return (profile.handle)
+    end
+    if el == 1:
+	return (profile.follow_module)
+    end
+    if el == 2:
+	return (profile.follow_nft)
+    end
+    return (0)
+end
+
+@view
 func get_profile_by_hh{
     syscall_ptr : felt*,
     pedersen_ptr : HashBuiltin*,
