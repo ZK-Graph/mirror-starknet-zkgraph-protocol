@@ -61,10 +61,10 @@ end
 
 @event
 func PostCreated(
-        profile_id : Uint256, # should be indexed
-        pub_id : Uint256, # should be indexed
-        content_uri : felt, # string
-        timestamp : felt):
+    profile_id : Uint256, # should be indexed
+    pub_id : Uint256, # should be indexed
+    content_uri : felt, # string
+    timestamp : felt):
 end
 
 #
@@ -194,24 +194,25 @@ func create_profile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
 
     # we validate that profile_id_by_hh_storage storage has appropriate  
     # handle -> profile_id pair
+    # actually we just check whether or not such Handle is exists 
 
     let (handle_hash) = get_keccak_hash(vars.handle)
     let (handle_hash_felt) = uint256_to_address_felt(handle_hash)
-    with_attr error_message("Profile ID by Handle Hash != 0"):
+    with_attr error_message("Profile ID by Handle Hash != 0. Such handle is exists. This handle is taken"):
 	    let (profile_id_by_handle_hash : Uint256) = profile_id_by_hh_storage.read(handle_hash_felt)
 	    let (profile_id_felt : felt) = uint256_to_address_felt(profile_id_by_handle_hash)
 	    assert_not_zero(profile_id_felt)
     end
 
-    # not clear to me
-
+    # add new record to profile_id_by_hh_storage storage
+    
     profile_id_by_hh_storage.write(handle_hash_felt, profile_id)
 
-    # maybe change to 
-    # let pub_count : Uint256 = Uint256(0, 0)
 
-    let (pub_count : Uint256) = felt_to_uint256(0)
+    let pub_count : Uint256 = Uint256(0, 0)
     let (local struct_array : DataTypes.ProfileStruct*) = alloc()
+
+    # refactoring is required
 
     if vars.follow_module != 0:
         assert struct_array[0] = DataTypes.ProfileStruct(pub_count=pub_count, follow_module=vars.follow_module, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
@@ -219,10 +220,13 @@ func create_profile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         profile_by_id.write(profile_id, struct_array[0])
         _emit_profile_created(profile_id, vars, follow_module_return_data)
         return ()
+
     else:
         assert struct_array[0] = DataTypes.ProfileStruct(pub_count=pub_count, follow_module=0, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
         profile_by_id.write(profile_id, struct_array[0])
+        _emit_profile_created(profile_id, vars, 0)
         return ()
+
     end
 end
 
