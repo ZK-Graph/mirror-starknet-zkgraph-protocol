@@ -11,18 +11,23 @@ from starkware.starknet.common.syscalls import get_contract_address, get_caller_
 from libraries.DataTypes import DataTypes
 from interfaces.IFollowModule import IFollowModule
 
+#
+# Title: PublishingLogic
+# Author: zkGraph 
+#
+# This is the library that contains the logic for profile creation & publication.
+#
 
 # 
 # Storage
 #
 
 @storage_var
-func profile_id_by_hh_storage(handle : felt) -> (profile_id : Uint256):
+func profile_by_id(profile_id : Uint256) -> (profileStruct : DataTypes.ProfileStruct):
 end
 
-
 @storage_var
-func profile_by_id(profile_id : Uint256) -> (profileStruct : DataTypes.ProfileStruct):
+func profile_id_by_hh_storage(handle : felt) -> (profile_id : Uint256):
 end
 
 @storage_var
@@ -65,6 +70,11 @@ end
 #
 # Getters
 #
+
+# Function. Getter. Returns ProfileStruct by profile_id
+# Params:
+# profile_id - Uint256 profile ID
+
 @view
 func get_profile_by_id{
     syscall_ptr : felt*,
@@ -77,6 +87,14 @@ func get_profile_by_id{
     return (profile)
 end
 
+# Function. Getter. Custom function to return one of free elements of DataTypes.ProfileStruct 
+# Params:
+# profile_id - Uint256 profile ID
+# el - element of DataTypes.ProfileStruct
+#   el = 0 -> handle
+#   el = 1 -> follow_module
+#   el = 2 -> follow_nft
+
 @view
 func get_profile_el_by_id{
     syscall_ptr : felt*,
@@ -84,17 +102,25 @@ func get_profile_el_by_id{
     range_check_ptr
     }(profile_id : Uint256, el : felt) -> (profile : felt):
     let (profile : DataTypes.ProfileStruct) = profile_by_id.read(profile_id)
+
     if el == 0:
         return (profile.handle)
     end
+
     if el == 1:
-	return (profile.follow_module)
+	    return (profile.follow_module)
     end
+
     if el == 2:
-	return (profile.follow_nft)
+	    return (profile.follow_nft)
     end
+
     return (0)
 end
+
+# Function. Getter. Returns profile_id by handle hash
+# Params:
+# handle_hash - keccak hash function of Profile's handle
 
 @view
 func get_profile_by_hh{
@@ -111,22 +137,33 @@ end
 #
 # Internal
 #
+
+# Function. Internal. Keccak hash function calculation
+# Params:
+# value_to_hash - felt value we would like to calculate hash from. For example: profile's handle
+
 func get_keccak_hash{
     syscall_ptr : felt*,
     pedersen_ptr : HashBuiltin*,
     range_check_ptr,
     bitwise_ptr : BitwiseBuiltin*
     }(value_to_hash : felt) -> (hashed_value : Uint256):
+
     alloc_locals
+
     let (local keccak_ptr_start) = alloc()
     let keccak_ptr = keccak_ptr_start
     let (local arr : felt*) = alloc()
     assert arr[0] = value_to_hash
+
+
     let (hashed_value) = keccak_felts{keccak_ptr=keccak_ptr}(1, arr)
     finalize_keccak(keccak_ptr_start=keccak_ptr_start, keccak_ptr_end=keccak_ptr)
+
     return (hashed_value)
 end
 
+# Two Uint256 / felt functions
 
 func uint256_to_address_felt(x : Uint256) -> (address : felt):
     return (x.low + x.high * 2 ** 128)
@@ -137,11 +174,26 @@ func felt_to_uint256{range_check_ptr}(x) -> (x_ : Uint256):
     return (Uint256(low=split.low, high=split.high))
 end
 
+# Function. Internal. Executes the logic to create a profile with the given parameters to the given address.
+# Params:
+# vars - The CreateProfileData struct containing the following parameters
+#    to - The address receiving the profile
+#    handle - The handle to set for the profile, must be unique and non-empty
+#    imageURI - The URI to set for the profile image
+#    followModule - The follow module to use, can be the zero address
+#    followModuleInitData - The follow module initialization data, if any
+#    followNFTURI - The URI to set for the follow NFT
+# profile_id - Uint256 profile ID
+# _followModuleWhitelisted - The storage reference to the mapping of whitelist status by follow module address
+
 
 func create_profile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
     }(vars : DataTypes.CreateProfileData, profile_id : Uint256, _follow_module_whitelisted : felt
     ) -> ():
     alloc_locals
+
+    
+
     let (handle_hash) = get_keccak_hash(vars.handle)
     let (handle_hash_felt) = uint256_to_address_felt(handle_hash)
     with_attr error_message("Profile ID by Handle Hash != 0"):
