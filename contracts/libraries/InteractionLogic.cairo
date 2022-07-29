@@ -12,7 +12,7 @@ from libraries.DataTypes import DataTypes
 from interfaces.IFollowModule import IFollowModule
 from interfaces.IFollowNFT import IFollowNFT
 
-from libraries.PublishingLogic import get_profile_by_id, get_profile_by_hh, get_profile_el_by_id
+from libraries.PublishingLogic import get_profile_by_id, get_profile_by_hh, get_profile_element_by_id
 
 #to be refactored. For MVP/Demo purposes we are about to use Only Dust Stream library 
 #from onlydust.stream.default_implementation import stream
@@ -51,9 +51,9 @@ end
 # func Collected(
 #     collector : felt,
 #     profile_id : Uint256,
-#     pub_id : Uint256,
+#     publication_id : Uint256,
 #     root_profile_id : Uint256,
-#     root_pub_id : Uint256,
+#     root_publication_id : Uint256,
 #     collect_module_data : felt,
 #     timestamp : felt
 # end
@@ -81,7 +81,7 @@ end
 # @event
 # func CollectNFTDeployed(
 #     profile_id : Uint256,
-#     pub_id : Uint256,
+#     publication_id : Uint256,
 #     collect_nft : felt,
 #     timestamp : felt):
 # end
@@ -129,7 +129,7 @@ func follow{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, b
     }(follower : felt, profile_id : Uint256, follow_module_data : felt) -> (retval : Uint256):
     
     alloc_locals
-    let (handle : felt) = get_profile_el_by_id(profile_id, 0)
+    let (handle : felt) = get_profile_element_by_id(profile_id, 0)
     
     let (handle_hash : Uint256) = get_keccak_hash(handle)
     let (handle_hash_felt : felt) = uint256_to_felt(handle_hash)
@@ -140,9 +140,9 @@ func follow{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, b
 	    assert profile_id = profile_id_by_hh
     end
 
-    let (follow_module : felt) = get_profile_el_by_id(profile_id, 1)
+    let (follow_module : felt) = get_profile_element_by_id(profile_id, 1)
 
-    let (follow_nft : felt) = get_profile_el_by_id(profile_id, 2)
+    let (follow_nft : felt) = get_profile_element_by_id(profile_id, 2)
 
     #     # we cannot use following approach as we need to write whole structure
     #     # ideally deploy Follow NFT with Profile NFT

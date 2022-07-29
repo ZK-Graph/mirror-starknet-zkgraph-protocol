@@ -31,7 +31,7 @@ func profile_id_by_hh_storage(handle : felt) -> (profile_id : Uint256):
 end
 
 @storage_var
-func pub_id_by_profile(profile_id : Uint256) -> (retval : DataTypes.PublicationStruct):
+func publication_id_by_profile(profile_id : Uint256) -> (retval : DataTypes.PublicationStruct):
 end
 
 #
@@ -62,7 +62,7 @@ end
 @event
 func PostCreated(
     profile_id : Uint256, # should be indexed
-    pub_id : Uint256, # should be indexed
+    publication_id : Uint256, # should be indexed
     content_uri : felt, # string
     timestamp : felt):
 end
@@ -90,28 +90,28 @@ end
 # Function. Getter. Custom function to return one of free elements of DataTypes.ProfileStruct 
 # Params:
 # profile_id - Uint256 profile ID
-# el - element of DataTypes.ProfileStruct
-#   el = 0 -> handle
-#   el = 1 -> follow_module
-#   el = 2 -> follow_nft
+# element - element of DataTypes.ProfileStruct
+#   element = 0 -> handle
+#   element = 1 -> follow_module
+#   element = 2 -> follow_nft
 
 @view
-func get_profile_el_by_id{
+func get_profile_element_by_id{
     syscall_ptr : felt*,
     pedersen_ptr : HashBuiltin*,
     range_check_ptr
-    }(profile_id : Uint256, el : felt) -> (profile : felt):
+    }(profile_id : Uint256, element : felt) -> (profile : felt):
     let (profile : DataTypes.ProfileStruct) = profile_by_id.read(profile_id)
 
-    if el == 0:
+    if element == 0:
         return (profile.handle)
     end
 
-    if el == 1:
+    if element == 1:
 	    return (profile.follow_module)
     end
 
-    if el == 2:
+    if element == 2:
 	    return (profile.follow_nft)
     end
 
@@ -209,20 +209,20 @@ func create_profile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     profile_id_by_hh_storage.write(handle_hash_felt, profile_id)
 
 
-    let pub_count : Uint256 = Uint256(0, 0)
+    let publications_count : Uint256 = Uint256(0, 0)
     let (local struct_array : DataTypes.ProfileStruct*) = alloc()
 
     # refactoring is required
 
     if vars.follow_module != 0:
-        assert struct_array[0] = DataTypes.ProfileStruct(pub_count=pub_count, follow_module=vars.follow_module, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
+        assert struct_array[0] = DataTypes.ProfileStruct(publications_count=publications_count, follow_module=vars.follow_module, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
         let (follow_module_return_data) = _init_follow_module(profile_id, vars.follow_module, vars.follow_module_init_data, _follow_module_whitelisted)
         profile_by_id.write(profile_id, struct_array[0])
         _emit_profile_created(profile_id, vars, follow_module_return_data)
         return ()
 
     else:
-        assert struct_array[0] = DataTypes.ProfileStruct(pub_count=pub_count, follow_module=0, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
+        assert struct_array[0] = DataTypes.ProfileStruct(publications_count=publications_count, follow_module=0, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
         profile_by_id.write(profile_id, struct_array[0])
         _emit_profile_created(profile_id, vars, 0)
         return ()
@@ -234,20 +234,20 @@ end
 # Params:
 # profile_id - The profile ID to associate this publication to.
 # content_uri - The URI to set for this publication.
-# pub_id - The publication ID to associate with this publication.
-# _pub_id_by_profile - The storage reference to the mapping of publications by publication ID by profile ID.
+# publication_id - The publication ID to associate with this publication.
+# _publication_id_by_profile - The storage reference to the mapping of publications by publication ID by profile ID.
 
 func create_post{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-    }(profile_id : Uint256, content_uri : felt, pub_id : Uint256, _pub_id_by_profile : felt
+    }(profile_id : Uint256, content_uri : felt, publication_id : Uint256, _publication_id_by_profile : felt
     ) -> ():
 
     alloc_locals
     let (local struct_array : DataTypes.PublicationStruct*) = alloc()
 
-    assert struct_array[0] = DataTypes.PublicationStruct(profile_id_pointed=profile_id, pub_id_pointed=pub_id, content_uri=content_uri)
-    pub_id_by_profile.write(profile_id, struct_array[0])
+    assert struct_array[0] = DataTypes.PublicationStruct(profile_id_pointed=profile_id, publication_id_pointed=publication_id, content_uri=content_uri)
+    publication_id_by_profile.write(profile_id, struct_array[0])
     let (timestamp : felt) = get_block_timestamp()
-    PostCreated.emit(profile_id, pub_id, content_uri, timestamp)
+    PostCreated.emit(profile_id, publication_id, content_uri, timestamp)
     return ()
 end
 
