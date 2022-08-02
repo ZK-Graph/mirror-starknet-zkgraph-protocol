@@ -25,9 +25,9 @@ namespace DataTypes:
 	    member profile_id_pointed : Uint256
 	    member pub_id_pointed : Uint256
 	    member content_uri : felt
-	    member reference_module : felt
-	    member collect_module : felt
-	    member collect_nft : felt
+#	    member reference_module : felt
+#	    member collect_module : felt
+#	    member collect_nft : felt
 	end
 
 	struct CreateProfileData:
