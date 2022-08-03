@@ -1,5 +1,9 @@
 # ZK Social Graph
 
+Original repo: https://gitlab.com/zk-graph/starknet-zkgraph-protocol 
+
+Mirror: https://github.com/ZK-Graph/mirror-starknet-zkgraph-protocol 
+
 ## About
 
 ZK Social Graph is a Web3, Lens Protocol compatible smart contracts-based social graph for the StarkNet Ecosystem designed to empower creators to own the links between themselves and their community, forming a fully composable, user-owned social graph. The protocol is built from the ground up with modularity in mind, allowing new features to be added while ensuring immutable user-owned content and social relationships.
