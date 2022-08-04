@@ -34,6 +34,10 @@ end
 func publication_id_by_profile(profile_id : Uint256) -> (retval : DataTypes.PublicationStruct):
 end
 
+@storage_var
+func follow_module_whitelisted(follow_module : felt) -> (boolean : felt):
+end
+
 #
 # Events
 #
@@ -132,6 +136,22 @@ func get_profile_by_hh{
     let (profile_id : Uint256) = profile_id_by_hh_storage.read(handle_hash)
 
     return (profile_id)
+end
+
+# Function. Getter. Returns boolean by follow_module 
+# Params:
+# follow_module - follow module address
+
+@view
+func get_follow_module_bool{
+    syscall_ptr : felt*,
+    pedersen_ptr : HashBuiltin*,
+    range_check_ptr
+    }(follow_module : felt) -> (boolean : felt):
+
+    let (boolean : felt) = follow_module_whitelisted.read(follow_module)
+
+    return (boolean)
 end
 
 #
