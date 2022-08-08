@@ -215,14 +215,14 @@ func create_profile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     # refactoring is required
 
     if vars.follow_module != 0:
-        assert struct_array[0] = DataTypes.ProfileStruct(publications_count=publications_count, follow_module=vars.follow_module, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
+        assert struct_array[0] = DataTypes.ProfileStruct(pub_count=publications_count, follow_module=vars.follow_module, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
         let (follow_module_return_data) = _init_follow_module(profile_id, vars.follow_module, vars.follow_module_init_data, _follow_module_whitelisted)
         profile_by_id.write(profile_id, struct_array[0])
         _emit_profile_created(profile_id, vars, follow_module_return_data)
         return ()
 
     else:
-        assert struct_array[0] = DataTypes.ProfileStruct(publications_count=publications_count, follow_module=0, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
+        assert struct_array[0] = DataTypes.ProfileStruct(pub_count=publications_count, follow_module=0, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
         profile_by_id.write(profile_id, struct_array[0])
         _emit_profile_created(profile_id, vars, 0)
         return ()
@@ -244,7 +244,7 @@ func create_post{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     alloc_locals
     let (local struct_array : DataTypes.PublicationStruct*) = alloc()
 
-    assert struct_array[0] = DataTypes.PublicationStruct(profile_id_pointed=profile_id, publication_id_pointed=publication_id, content_uri=content_uri)
+    assert struct_array[0] = DataTypes.PublicationStruct(profile_id_pointed=profile_id, pub_id_pointed=publication_id, content_uri=content_uri)
     publication_id_by_profile.write(profile_id, struct_array[0])
     let (timestamp : felt) = get_block_timestamp()
     PostCreated.emit(profile_id, publication_id, content_uri, timestamp)
