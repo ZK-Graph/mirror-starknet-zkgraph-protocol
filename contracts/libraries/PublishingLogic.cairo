@@ -34,10 +34,6 @@ end
 func publication_id_by_profile(profile_id : Uint256) -> (retval : DataTypes.PublicationStruct):
 end
 
-@storage_var
-func follow_module_whitelisted(follow_module : felt) -> (boolean : felt):
-end
-
 #
 # Events
 #
@@ -138,22 +134,6 @@ func get_profile_by_hh{
     return (profile_id)
 end
 
-# Function. Getter. Returns boolean by follow_module 
-# Params:
-# follow_module - follow module address
-
-@view
-func get_follow_module_bool{
-    syscall_ptr : felt*,
-    pedersen_ptr : HashBuiltin*,
-    range_check_ptr
-    }(follow_module : felt) -> (boolean : felt):
-
-    let (boolean : felt) = follow_module_whitelisted.read(follow_module)
-
-    return (boolean)
-end
-
 #
 # Internal
 #
@@ -194,96 +174,97 @@ func felt_to_uint256{range_check_ptr}(x) -> (x_ : Uint256):
     return (Uint256(low=split.low, high=split.high))
 end
 
-# Function. Internal. Executes the logic to create a profile with the given parameters to the given address.
-# Params:
-# vars - The CreateProfileData struct containing the following parameters
-#    to - The address receiving the profile
-#    handle - The handle to set for the profile, must be unique and non-empty
-#    imageURI - The URI to set for the profile image
-#    followModule - The follow module to use, can be the zero address
-#    followModuleInitData - The follow module initialization data, if any
-#    followNFTURI - The URI to set for the follow NFT
-# profile_id - Uint256 profile ID
-# _followModuleWhitelisted - The storage reference to the mapping of whitelist status by follow module address
+namespace PublishingLogic:
+    # Function. Internal. Executes the logic to create a profile with the given parameters to the given address.
+    # Params:
+    # vars - The CreateProfileData struct containing the following parameters
+    #    to - The address receiving the profile
+    #    handle - The handle to set for the profile, must be unique and non-empty
+    #    imageURI - The URI to set for the profile image
+    #    followModule - The follow module to use, can be the zero address
+    #    followModuleInitData - The follow module initialization data, if any
+    #    followNFTURI - The URI to set for the follow NFT
+    # profile_id - Uint256 profile ID
+    # _followModuleWhitelisted - The storage reference to the mapping of whitelist status by follow module address
 
 
-func create_profile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-    }(vars : DataTypes.CreateProfileData, profile_id : Uint256, _follow_module_whitelisted : felt
-    ) -> ():
-    alloc_locals
+    func create_profile{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+        }(vars : DataTypes.CreateProfileData, profile_id : Uint256, _follow_module_whitelisted : felt
+        ) -> ():
+        alloc_locals
 
-    # we validate that profile_id_by_hh_storage storage has appropriate  
-    # handle -> profile_id pair
-    # actually we just check whether or not such Handle is exists 
+        # we validate that profile_id_by_hh_storage storage has appropriate  
+        # handle -> profile_id pair
+        # actually we just check whether or not such Handle is exists 
 
-    let (handle_hash) = get_keccak_hash(vars.handle)
-    let (handle_hash_felt) = uint256_to_address_felt(handle_hash)
-    with_attr error_message("Profile ID by Handle Hash != 0. Such handle is exists. This handle is taken"):
-	    let (profile_id_by_handle_hash : Uint256) = profile_id_by_hh_storage.read(handle_hash_felt)
-	    let (profile_id_felt : felt) = uint256_to_address_felt(profile_id_by_handle_hash)
-	    assert_not_zero(profile_id_felt)
+        let (handle_hash) = get_keccak_hash(vars.handle)
+        let (handle_hash_felt) = uint256_to_address_felt(handle_hash)
+        with_attr error_message("Profile ID by Handle Hash != 0. Such handle is exists. This handle is taken"):
+            let (profile_id_by_handle_hash : Uint256) = profile_id_by_hh_storage.read(handle_hash_felt)
+            let (profile_id_felt : felt) = uint256_to_address_felt(profile_id_by_handle_hash)
+            assert_not_zero(profile_id_felt)
+        end
+
+        # add new record to profile_id_by_hh_storage storage
+        
+        profile_id_by_hh_storage.write(handle_hash_felt, profile_id)
+
+
+        let publications_count : Uint256 = Uint256(0, 0)
+        let (local struct_array : DataTypes.ProfileStruct*) = alloc()
+
+        # refactoring is required
+
+        if vars.follow_module != 0:
+            assert struct_array[0] = DataTypes.ProfileStruct(pub_count=publications_count, follow_module=vars.follow_module, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
+            let (follow_module_return_data) = _init_follow_module(profile_id, vars.follow_module, vars.follow_module_init_data, _follow_module_whitelisted)
+            profile_by_id.write(profile_id, struct_array[0])
+            _emit_profile_created(profile_id, vars, follow_module_return_data)
+            return ()
+
+        else:
+            assert struct_array[0] = DataTypes.ProfileStruct(pub_count=publications_count, follow_module=0, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
+            profile_by_id.write(profile_id, struct_array[0])
+            _emit_profile_created(profile_id, vars, 0)
+            return ()
+
+        end
     end
 
-    # add new record to profile_id_by_hh_storage storage
-    
-    profile_id_by_hh_storage.write(handle_hash_felt, profile_id)
+    # Function. Internal. Creates a post publication mapped to the given profile.
+    # Params:
+    # profile_id - The profile ID to associate this publication to.
+    # content_uri - The URI to set for this publication.
+    # publication_id - The publication ID to associate with this publication.
+    # _publication_id_by_profile - The storage reference to the mapping of publications by publication ID by profile ID.
 
+    func create_post{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+        }(profile_id : Uint256, content_uri : felt, publication_id : Uint256, _publication_id_by_profile : felt
+        ) -> ():
 
-    let publications_count : Uint256 = Uint256(0, 0)
-    let (local struct_array : DataTypes.ProfileStruct*) = alloc()
+        alloc_locals
+        let (local struct_array : DataTypes.PublicationStruct*) = alloc()
 
-    # refactoring is required
-
-    if vars.follow_module != 0:
-        assert struct_array[0] = DataTypes.ProfileStruct(publications_count=publications_count, follow_module=vars.follow_module, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
-        let (follow_module_return_data) = _init_follow_module(profile_id, vars.follow_module, vars.follow_module_init_data, _follow_module_whitelisted)
-        profile_by_id.write(profile_id, struct_array[0])
-        _emit_profile_created(profile_id, vars, follow_module_return_data)
+        assert struct_array[0] = DataTypes.PublicationStruct(profile_id_pointed=profile_id, pub_id_pointed=publication_id, content_uri=content_uri)
+        publication_id_by_profile.write(profile_id, struct_array[0])
+        let (timestamp : felt) = get_block_timestamp()
+        PostCreated.emit(profile_id, publication_id, content_uri, timestamp)
         return ()
+    end
 
-    else:
-        assert struct_array[0] = DataTypes.ProfileStruct(publications_count=publications_count, follow_module=0, follow_nft=0, handle=vars.handle, image_uri=vars.image_uri, follow_nft_uri=vars.follow_nft_uri)
-        profile_by_id.write(profile_id, struct_array[0])
-        _emit_profile_created(profile_id, vars, 0)
+    # Function. Internal. Sets the follow module for a given profile.
+    # Params:
+    # 
+
+    func set_follow_module{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+        }(profile_id : Uint256, follow_module : felt, follow_module_init_data : felt, _profile : DataTypes.ProfileStruct, _follow_module_whitelisted : felt) -> ():
+        let (follow_module_return_data) = _init_follow_module(profile_id, follow_module, follow_module_init_data, _follow_module_whitelisted)
+
+        let (block_timestamp) = get_block_timestamp()
+        FollowModuleSet.emit(profile_id, follow_module, follow_module_return_data, block_timestamp)
         return ()
-
     end
 end
-
-# Function. Internal. Creates a post publication mapped to the given profile.
-# Params:
-# profile_id - The profile ID to associate this publication to.
-# content_uri - The URI to set for this publication.
-# publication_id - The publication ID to associate with this publication.
-# _publication_id_by_profile - The storage reference to the mapping of publications by publication ID by profile ID.
-
-func create_post{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-    }(profile_id : Uint256, content_uri : felt, publication_id : Uint256, _publication_id_by_profile : felt
-    ) -> ():
-
-    alloc_locals
-    let (local struct_array : DataTypes.PublicationStruct*) = alloc()
-
-    assert struct_array[0] = DataTypes.PublicationStruct(profile_id_pointed=profile_id, publication_id_pointed=publication_id, content_uri=content_uri)
-    publication_id_by_profile.write(profile_id, struct_array[0])
-    let (timestamp : felt) = get_block_timestamp()
-    PostCreated.emit(profile_id, publication_id, content_uri, timestamp)
-    return ()
-end
-
-# Function. Internal. Sets the follow module for a given profile.
-# Params:
-# 
-
-func set_follow_module{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(profile_id : Uint256, follow_module : felt, follow_module_init_data : felt, _profile : DataTypes.ProfileStruct, _follow_module_whitelisted : felt) -> ():
-    let (follow_module_return_data) = _init_follow_module(profile_id, follow_module, follow_module_init_data, _follow_module_whitelisted)
-
-    let (block_timestamp) = get_block_timestamp()
-    FollowModuleSet.emit(profile_id, follow_module, follow_module_return_data, block_timestamp)
-    return ()
-end
-
 
 func _init_follow_module{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(profile_id : Uint256, _follow_module : felt, _follow_module_init_data : felt, _follow_module_whitelisted : felt
