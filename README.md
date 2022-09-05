@@ -128,7 +128,19 @@ Zk badges verify user owns an NFT but leaves no bread crumbs back to his persona
 3. `git clone https://gitlab.com/zk-graph/starknet-zkgraph-protocol`
 4. `cd starknet-zkgraph-protocol`
 5. `nile init`
-6. `nile compile`
+6. `nile compile contracts/core/ZKGraphHub.cairo`
+7. You'll need to define `name`, `symbol` and `token_uri` and convert them to felt
+- Use `utils.py` to convert them:
+- `python3 -i utils.py`
+- `str_to_felt("name")` - use this function to convert name and symbol into felt
+- `str_to_felt_array("https://ipfs.io/ipfs/some_link")` - use this function to convert metadata URI to array of felts
+8. `nile deploy ZKGraphHub --network=goerli $name $symbol $owner $token_uri_len $token_uri_1 $token_uri_2 $token_uri_3`
+- Instead of `$name` and `$symbol` use output of function `str_to_felt`
+- Instead of `$owner` paste your wallet address
+- Instead of `$token_uri_len` specify length of array `$token_uri`
+- Instead of `$token_uri_1,2,3` specify output of function `str_to_felt_array`
+- Example: `nile deploy ZKGraphHub --network=goerli 25415517598732360 25415517598732360 0x05120a9dCCe39BD6057C1DF312f36862718dABcE1baF36bC6af468Cd447d5638 3 184555836509371486645351865271880215103735885104792769856590766422418009699 196873592762108487569195338562930434079383700377033949266657547814185298286 47`
+
 
 ## Milestones
 
