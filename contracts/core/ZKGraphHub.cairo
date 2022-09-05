@@ -15,7 +15,6 @@ from openzeppelin.security.safemath.library import SafeUint256
 
 
 from libraries.DataTypes import DataTypes
-from libraries.constants import EIP712_REVISION, PERMIT, PERMIT_FOR_ALL, BURN_WITH_SIG, EIP712_DOMAIN
 from libraries.PublishingLogic import PublishingLogic
 from core.base.ERC721Time import ERC721Time
 
