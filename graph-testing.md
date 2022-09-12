@@ -56,6 +56,7 @@ Follow module hasn't been implemented yet. Transaction will proceed if the value
 Follow module haven't been implemented yet. Transaction will proceed if the value is zero.
 ​
 - create_profile_data.follow_nft_uri = 0
+
 Handler for Follow NFT URI hasn't been implemented yet. It can be ANY string no longer than 31 characters. But we recommend to keep it as zero.
 
 ![zkGraph - create_profile input](https://gitlab.com/zk-graph/starknet-zkgraph-protocol/-/raw/main/assets/create_profile_input.png)
