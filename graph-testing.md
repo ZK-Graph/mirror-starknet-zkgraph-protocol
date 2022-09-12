@@ -9,7 +9,7 @@ Contact us if any:
 Twitter: https://twitter.com/ZKGraph
 Telegram Group: https://t.me/+b9d7ytd9BQ5lZDA1
 
-![zkGraph - Profile and Follow NFTs](https://gitlab.com/zk-graph/starknet-zkgraph-protocol/-/blob/graph-testing-instructions/assets/zkGraph_-_NFTs.png)
+![zkGraph - Profile and Follow NFTs](https://gitlab.com/zk-graph/starknet-zkgraph-protocol/-/raw/graph-testing-instructions/assets/zkGraph_-_NFTs.png)
 
 ## 1. Check list of existing Profile NFT: 
 
@@ -38,7 +38,7 @@ or use 3rd party service to convert handle string to Hex.
 
 https://www.rapidtables.com/convert/number/ascii-to-hex.html
 
-![zkGraph - ASCII to Hex Converter](https://gitlab.com/zk-graph/starknet-zkgraph-protocol/-/blob/graph-testing-instructions/assets/ASCII_to_Hex_converter.png)
+![zkGraph - ASCII to Hex Converter](https://gitlab.com/zk-graph/starknet-zkgraph-protocol/-/raw/graph-testing-instructions/assets/ASCII_to_Hex_converter.png)
 
 - create_profile_data.image_uri
 We haven't implemented handler for image_uri yet, subsequently it can be ANY string no longer than 31 characters (for example you Handle). 
@@ -52,7 +52,7 @@ Follow module haven't been implemented yet. Transaction will proceed if the valu
 - create_profile_data.follow_nft_uri = 0
 Handler for Follow NFT URI hasn't been implemented yet. It can be ANY string no longer than 31 characters. But we recommend to keep it as zero.
 
-![zkGraph - create_profile input](https://gitlab.com/zk-graph/starknet-zkgraph-protocol/-/blob/graph-testing-instructions/assets/create_profile_input.png)
+![zkGraph - create_profile input](https://gitlab.com/zk-graph/starknet-zkgraph-protocol/-/raw/graph-testing-instructions/assets/create_profile_input.png)
 
 ### c. Troubleshoot your transaction at
 https://starktx.info/testnet/YOURTRANSACTIONID/
