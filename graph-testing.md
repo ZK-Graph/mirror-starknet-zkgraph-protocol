@@ -77,6 +77,7 @@ Make sure you find appropriate EVENT. Check profile_id and sender fields.
 ### a. Call `follow` function with `profile_id` parameter
 
 Get available Profile ID numbers from https://mintsquare.io/collection/starknet-testnet/0x005e50b057250ae513e2b5ba77e377669f9e29d48ebd3a14e00b6b27aee0a61e/nfts
+Actually, you can follow and Profile ID number below your ID number. 
 
 ### b. Troubleshoot your transaction at
 https://starktx.info/testnet/YOURTRANSACTIONID/
