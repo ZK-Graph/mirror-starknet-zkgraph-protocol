@@ -58,9 +58,8 @@ Handler for Follow NFT URI hasn't been implemented yet. It can be ANY string no 
 https://starktx.info/testnet/YOURTRANSACTIONID/
 
 Make sure you find appropriate EVENT. Check profile_id and sender fields.
-```
-0x5e50b057.ProfileCreated(profile_id={low=2, high=0}, sender=0x73830811f177594866961267ec46da9b224d08bedc9f7c8bbc2e7d98d950b1e, to=0x73830811f177594866961267ec46da9b224d08bedc9f7c8bbc2e7d98d950b1e, handle=35423280659516410475122356843, image_uri=35423280659516410475122356843, follow_module=0, follow_module_return_data=0, follow_nft_uri=0, timestamp=2022-09-10 15:05:15)
-```
+> ```0x5e50b057.ProfileCreated(profile_id={low=2, high=0}, sender=0x73830811f177594866961267ec46da9b224d08bedc9f7c8bbc2e7d98d950b1e, to=0x73830811f177594866961267ec46da9b224d08bedc9f7c8bbc2e7d98d950b1e, handle=35423280659516410475122356843, image_uri=35423280659516410475122356843, follow_module=0, follow_module_return_data=0, follow_nft_uri=0, timestamp=2022-09-10 15:05:15)```
+
 - profile_id - your new Profile ID number
 
 ## 3. Follow other Profile NFTs
@@ -73,9 +72,7 @@ Get available Profile ID numbers from https://mintsquare.io/collection/starknet-
 https://starktx.info/testnet/YOURTRANSACTIONID/
 
 Make sure you find appropriate EVENT:
-```
-0x5e50b057.Followed(follower=0x5120a9dcce39bd6057c1df312f36862718dabce1baf36bc6af468cd447d5638, profile_id={low=1, high=0}, folow_module_data=0, timestamp=2022-09-10 14:48:32)
-```
+> ``` 0x5e50b057.Followed(follower=0x5120a9dcce39bd6057c1df312f36862718dabce1baf36bc6af468cd447d5638, profile_id={low=1, high=0}, folow_module_data=0, timestamp=2022-09-10 14:48:32) ```
 - follower - your address
 - profile_id - required Profile ID number
  
