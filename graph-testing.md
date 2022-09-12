@@ -5,9 +5,8 @@ We deployed sample zkGraph smart contract to StarkNet testnet. Feel free to join
 zkGraph is a Web3, Lens Protocol compatible smart contracts-based social graph for the StarkNet Ecosystem.
 
 Contact us if any:
-
-Twitter: https://twitter.com/ZKGraph
-Telegram Group: https://t.me/+b9d7ytd9BQ5lZDA1
+- Twitter: https://twitter.com/ZKGraph
+- Telegram Group: https://t.me/+b9d7ytd9BQ5lZDA1
 
 ![zkGraph - Profile and Follow NFTs](https://gitlab.com/zk-graph/starknet-zkgraph-protocol/-/raw/main/assets/zkGraph_-_NFTs.png)
 
