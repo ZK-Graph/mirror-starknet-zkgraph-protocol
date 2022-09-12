@@ -13,7 +13,11 @@ Telegram Group: https://t.me/+b9d7ytd9BQ5lZDA1
 
 ## 1. Check list of existing Profile NFT: 
 
+MinsSquare:
 https://mintsquare.io/collection/starknet-testnet/0x02fa23eb9ec2912d2b81c7c6c4380f20bc7c9490fe9056d33b784ae6d52e10a3/nfts
+
+or Aspect:
+https://testnet.aspect.co/collection/0x02fa23eb9ec2912d2b81c7c6c4380f20bc7c9490fe9056d33b784ae6d52e10a3
 
 ## 2. Mint your profile NFT
 
