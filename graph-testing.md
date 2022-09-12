@@ -32,9 +32,10 @@ https://goerli.voyager.online/contract/0x02fa23eb9ec2912d2b81c7c6c4380f20bc7c949
 Convert your handle string with https://gitlab.com/zk-graph/starknet-zkgraph-protocol/-/blob/main/utils.py 
 
 ```
-print(str_to_felt("rustam.stark"))
-
 $ python3 -i utils.py
+
+str_to_felt("rustam.stark")
+
 ```
 
 or use 3rd party service to convert handle string to Hex.
@@ -45,7 +46,7 @@ https://www.rapidtables.com/convert/number/ascii-to-hex.html
 
 - create_profile_data.image_uri
 
-We haven't implemented handler for image_uri yet, subsequently it can be ANY string no longer than 31 characters (for example you Handle). 
+We haven't implemented handler for image_uri yet, subsequently it can be ANY string no longer than 31 characters (for example your Handle). 
 
 - create_profile_data.follow_module = 0 
 
