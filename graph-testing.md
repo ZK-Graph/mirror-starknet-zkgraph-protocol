@@ -44,12 +44,15 @@ https://www.rapidtables.com/convert/number/ascii-to-hex.html
 ![zkGraph - ASCII to Hex Converter](https://gitlab.com/zk-graph/starknet-zkgraph-protocol/-/raw/main/assets/ASCII_to_Hex_converter.png)
 
 - create_profile_data.image_uri
+
 We haven't implemented handler for image_uri yet, subsequently it can be ANY string no longer than 31 characters (for example you Handle). 
 
 - create_profile_data.follow_module = 0 
+
 Follow module hasn't been implemented yet. Transaction will proceed if the value is zero.
 ​
 - create_profile_data.follow_module_init_data = 0
+
 Follow module haven't been implemented yet. Transaction will proceed if the value is zero.
 ​
 - create_profile_data.follow_nft_uri = 0
