@@ -18,7 +18,6 @@ from openzeppelin.token.erc721.library import ERC721
 from libraries.DataTypes import DataTypes
 from libraries.constants import EIP712_REVISION, PERMIT, PERMIT_FOR_ALL, BURN_WITH_SIG, EIP712_DOMAIN
 from libraries.PublishingLogic import PublishingLogic
-from libraries.InteractionLogic import InteractionLogic
 from core.base.ERC721Time import ERC721Time
 
 
@@ -27,11 +26,7 @@ from core.base.ERC721Time import ERC721Time
 #
 
 @storage_var
-func profile_counter() -> (number: Uint256):
-end
-
-@storage_var
-func follow_nft() -> (address: felt):
+func follow_counter() -> (number: Uint256):
 end
 #
 # Events
@@ -48,46 +43,42 @@ func felt_to_uint256{range_check_ptr}(x) -> (x_ : Uint256):
 end
 
 
-namespace ZKGraphHub:
+namespace FollowNFT:
     
     @constructor
     func constructor{
 	syscall_ptr: felt*,
 	pedersen_ptr: HashBuiltin*,
 	range_check_ptr
-    }(name : felt, symbol : felt, owner : felt, _follow_nft: felt, token_uri_len: felt, token_uri: felt*):
+    }(name : felt, symbol : felt, owner : felt, token_uri_len: felt, token_uri: felt*):
 	ERC721Time.initialize(name, symbol, owner, token_uri_len, token_uri)
-        let (profile_cnt : Uint256) = felt_to_uint256(0)
-        profile_counter.write(profile_cnt)
-        follow_nft.write(_follow_nft)
+        let (follow_cnt : Uint256) = felt_to_uint256(0)
+        follow_counter.write(follow_cnt)
         return()
     end
 
-    func get_profile_counter{
+    func get_follow_counter{
             syscall_ptr : felt*,
             pedersen_ptr : HashBuiltin*,
             range_check_ptr
         }() -> (number : Uint256):
-        let (number) = profile_counter.read()
+        let (number) = follow_counter.read()
         return (number)
     end
 
-    ### Profile Owner Functions ###
+    ### Functions ###
     @external
-    func create_profile{
+    func mint{
 	syscall_ptr: felt*,
 	pedersen_ptr: HashBuiltin*,
-	range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*
-    }(create_profile_data : DataTypes.CreateProfileData) -> (profile_id : Uint256): 
+	range_check_ptr
+    }(to: felt) -> (profile_id : Uint256): 
         alloc_locals
-        let (_profile_counter : Uint256) = profile_counter.read()
-	let (profile_id : Uint256) = SafeUint256.add(_profile_counter, Uint256(1, 0))
-        let (caller: felt) = get_caller_address()
-	ERC721Time.mint(caller, profile_id)
-	PublishingLogic.create_profile(create_profile_data, profile_id, 0)
-        profile_counter.write(profile_id)
-	return (profile_id)
+        let (_follow_counter : Uint256) = follow_counter.read()
+	let (follow_id : Uint256) = SafeUint256.add(_follow_counter, Uint256(1, 0))
+	ERC721Time.mint(to, follow_id)
+        follow_counter.write(follow_id)
+	return (follow_id)
     end  
 
     @external
@@ -103,7 +94,6 @@ namespace ZKGraphHub:
         ERC721Time.transferFrom(_from, to, token_id)
         return()
     end
-    #func set_follow_module
 
     @external
     func approve{
@@ -123,18 +113,5 @@ namespace ZKGraphHub:
         }(operator: felt, approved: felt):
         ERC721Time.setApprovalForAll(operator, approved)
         return()
-    end
-
-    @external
-    func follow{
-            syscall_ptr: felt*,
-            pedersen_ptr: HashBuiltin*,
-            range_check_ptr,
-            bitwise_ptr : BitwiseBuiltin*
-        }(profile_id: Uint256):
-        let (sender: felt) = get_caller_address()
-        let (_follow_nft: felt) = follow_nft.read()
-        InteractionLogic.follow(sender, profile_id, 0, _follow_nft)
-        return ()
     end
 end

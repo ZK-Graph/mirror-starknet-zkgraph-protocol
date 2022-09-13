@@ -127,7 +127,7 @@ namespace InteractionLogic:
     #to be refactored. For MVP/Demo purposes we are about to use Only Dust Stream library  
 
     func follow{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-        }(follower : felt, profile_id : Uint256, follow_module_data : felt) -> (retval : Uint256):
+        }(follower : felt, profile_id : Uint256, follow_module_data : felt, _follow_nft: felt) -> (retval : Uint256):
         
         alloc_locals
         let (handle : felt) = get_profile_element_by_id(profile_id, 0)
@@ -155,7 +155,7 @@ namespace InteractionLogic:
         #     # profile_by_id.write(profile_id, follow_nft)
         # end
         let (sender) = get_caller_address()
-        let (follow_token_id : Uint256) = IFollowNFT.mint(sender, follower)
+        let (follow_token_id : Uint256) = IFollowNFT.mint(_follow_nft, follower)
 
         if follow_module != 0:
             IFollowModule.process_follow(sender, follower, profile_id, follow_module_data)

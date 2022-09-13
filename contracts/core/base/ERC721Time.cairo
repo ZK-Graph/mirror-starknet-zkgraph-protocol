@@ -148,7 +148,7 @@ namespace ERC721Time:
     func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         to : felt, token_id : Uint256
     ):
-        Ownable.assert_only_owner()
+#        Ownable.assert_only_owner()
         ERC721Enumerable._mint(to, token_id)
         return ()
     end
