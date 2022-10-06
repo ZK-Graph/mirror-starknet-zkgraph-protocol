@@ -4,173 +4,170 @@ from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
 
-namespace DataTypes:
-	struct EIP712Signature:
-    	member v : felt
-	    member r : Uint256
-	    member s : Uint256
-	    member deadline: Uint256
-	end
+namespace DataTypes {
+	struct EIP712Signature {
+    	    v : felt,
+	    r : Uint256,
+	    s : Uint256,
+	    deadline: Uint256,
+	}
 
-	struct ProfileStruct:
-	    member pub_count : Uint256
-	    member follow_module : felt
-	    member follow_nft : felt
-	    member handle : felt
-	    member image_uri : felt
-	    member follow_nft_uri : felt
-	end
+	struct ProfileStruct {
+	    pub_count : Uint256,
+	    follow_module : felt,
+	    follow_nft : felt,
+	    handle : felt,
+	    image_uri : felt,
+	    follow_nft_uri : felt,
+	}
 
-	struct PublicationStruct:
-	    member profile_id_pointed : Uint256
-	    member pub_id_pointed : Uint256
-	    member content_uri : felt
-#	    member reference_module : felt
-#	    member collect_module : felt
-#	    member collect_nft : felt
-	end
+	struct PublicationStruct {
+	    profile_id_pointed : Uint256,
+	    pub_id_pointed : Uint256,
+	    content_uri : felt,
+	}
 
-	struct CreateProfileData:
-    	member to : felt
-	    member handle : felt
-	    member image_uri : felt
-	    member follow_module : felt
-	    member follow_module_init_data : felt
-	    member follow_nft_uri : felt
-	end
+	struct CreateProfileData {
+    	    to : felt,
+	    handle : felt,
+	    image_uri : felt,
+	    follow_module : felt,
+	    follow_module_init_data : felt,
+	    follow_nft_uri : felt,
+	}
 
-	struct SetDefaultProfileWithSigData:
-	    member wallet : felt
-    	member profile_id : Uint256
-	    member sig : EIP712Signature
-	end
+	struct SetDefaultProfileWithSigData {
+	    wallet : felt,
+    	    profile_id : Uint256,
+	    sig : EIP712Signature,
+	}
 
-	struct SetFollowModuleWithSigData:
-	    member profile_id : Uint256
-	    member follow_module : felt
-	    member follow_module_init_data : felt
-	    member sig : EIP712Signature
-	end
+	struct SetFollowModuleWithSigData {
+	    profile_id : Uint256,
+	    follow_module : felt,
+	    follow_module_init_data : felt,
+	    sig : EIP712Signature,
+	}
 
-	struct SetDispatcherWithSigData:
-	    member profile_id : Uint256
-	    member dispatcher : felt
-	    member sig : EIP712Signature
-	end
+	struct SetDispatcherWithSigData {
+	    profile_id : Uint256,
+	    dispatcher : felt,
+	    sig : EIP712Signature,
+	}
 
-	struct SetProfileImageURIWithSigData:
-	    member profile_id : Uint256
-	    member image_uri : felt
-	    member sig : EIP712Signature
-	end
+	struct SetProfileImageURIWithSigData {
+	    profile_id : Uint256,
+	    image_uri : felt,
+	    sig : EIP712Signature,
+	}
 
-	struct SetFollowNFTURIWithSigData:
-    	member profile_id : Uint256
-	    member follow_nft_uri : felt
-	    member sig : EIP712Signature
-	end
+	struct SetFollowNFTURIWithSigData {
+    	    profile_id : Uint256,
+	    follow_nft_uri : felt,
+            sig : EIP712Signature,
+	}
 
-	struct PostData:
-	    member profile_id : Uint256
-	    member content_uri : felt
-	    member collect_module : felt
-	    member collect_module_init_data : felt
-	    member reference_module : felt
-	    member reference_module_init_data : felt
-	end
+	struct PostData {
+	    profile_id : Uint256,
+	    content_uri : felt,
+	    collect_module : felt,
+	    collect_module_init_data : felt,
+	    reference_module : felt,
+	    reference_module_init_data : felt,
+	}
 
-	struct PostWithSigData:
-	   	member profile_id : Uint256
-    	member content_uri : felt
-	    member collect_module : felt
-    	member collect_module_init_data : felt
-	    member reference_module : felt
-	    member reference_module_init_data : felt
-	    member sig : EIP712Signature
-	end
+	struct PostWithSigData {
+	    profile_id : Uint256,
+    	    content_uri : felt,
+	    collect_module : felt,
+    	    collect_module_init_data : felt,
+            reference_module : felt,
+	    reference_module_init_data : felt,
+	    sig : EIP712Signature,
+	}
 
-	struct CommentData:
-	    member profile_id : Uint256
-	    member content_uri : felt
-	    member profile_id_pointed : Uint256
-	    member pub_id_pointed : Uint256
-	    member reference_module_data : felt
-	    member collect_module : felt
-	    member collect_module_init_data : felt
-	    member reference_module : felt
-	    member reference_module_init_data : felt
-	end
+	struct CommentData {
+	    profile_id : Uint256,
+	    content_uri : felt,
+	    profile_id_pointed : Uint256,
+	    pub_id_pointed : Uint256,
+	    reference_module_data : felt,
+	    collect_module : felt,
+	    collect_module_init_data : felt,
+	    reference_module : felt,
+	    reference_module_init_data : felt,
+	}
 
-	struct CommentWithSigData:
-	    member profile_id : Uint256
-	    member content_uri : felt
-	    member profile_id_pointed : Uint256
-	    member pub_id_pointed : Uint256
-	    member reference_module_data : felt
-	    member collect_module : felt
-	    member collect_module_init_data : felt
-	    member reference_module : felt
-    	member reference_module_init_data : felt
-	    member sig : EIP712Signature
-	end
+	struct CommentWithSigData {
+	    profile_id : Uint256,
+	    content_uri : felt,
+	    profile_id_pointed : Uint256,
+	    pub_id_pointed : Uint256,
+	    reference_module_data : felt,
+	    collect_module : felt,
+	    collect_module_init_data : felt,
+	    reference_module : felt,
+    	    reference_module_init_data : felt,
+	    sig : EIP712Signature,
+	}
 
-	struct MirrorData:
-	    member profile_id : Uint256
-    	member profile_id_pointed : Uint256
-	    member pub_id_pointed : Uint256
-    	member reference_odule_data : felt
-	    member reference_module : felt
-	    member reference_module_init_data : felt
-	end
+	struct MirrorData {
+	    profile_id : Uint256,
+    	    profile_id_pointed : Uint256,
+            pub_id_pointed : Uint256,
+    	    reference_odule_data : felt,
+	    reference_module : felt,
+	    reference_module_init_data : felt,
+	}
 
-	struct MirrorWithSigData:
-	    member profile_id : Uint256
-	    member profile_id_pointed : Uint256
-	    member pub_id_pointed : Uint256
-	    member reference_module_data : felt
-	    member reference_module : felt
-	    member reference_module_init_data : felt
-	    member sig : EIP712Signature
-	end
+	struct MirrorWithSigData {
+            profile_id : Uint256,
+	    profile_id_pointed : Uint256,
+	    pub_id_pointed : Uint256,
+	    reference_module_data : felt,
+	    reference_module : felt,
+	    reference_module_init_data : felt,
+	    sig : EIP712Signature,
+	}
 
-	struct FollowWithSigData:
-	    member follower : felt
-	    member profile_ids : felt
-	    member datas : felt
-    	member sig : EIP712Signature
-	end
+	struct FollowWithSigData {
+	    follower : felt,
+	    profile_ids : felt,
+	    datas : felt,
+    	    sig : EIP712Signature,
+	}
 
-	struct CollectWithSigData:
-	    member collector : felt
-    	member profile_id : Uint256
-	    member pub_id : Uint256
-	    member data : felt
-    	member sig : EIP712Signature
-	end
+	struct CollectWithSigData {
+	    collector : felt,
+    	    profile_id : Uint256,
+	    pub_id : Uint256,
+	    data : felt,
+    	    sig : EIP712Signature,
+        }
 
-	struct SetProfileMetadataWithSigData:
-    	member profile_id : Uint256
-	    member metadata : felt
-	    member sig : EIP712Signature
-	end
+	struct SetProfileMetadataWithSigData {
+    	    profile_id : Uint256,
+	    metadata : felt,
+	    sig : EIP712Signature,
+	}
 
-	struct ToggleFollowWithSigData:
-	    member follower : felt
-    	member profile_ids : felt
-	    member enables : felt
-	    member sig : EIP712Signature
-	end
+	struct ToggleFollowWithSigData {
+	    follower : felt,
+    	    profile_ids : felt,
+	    enables : felt,
+	    sig : EIP712Signature,
+	}
 
 
-	# * @notice Contains the owner address and the mint timestamp for every NFT.
-	# *
-	# * Note: Instead of the owner address in the _tokenOwners private mapping, we now store it in the
-	# * _tokenData mapping, alongside the unchanging mintTimestamp.
-	# *
-	# * @param owner The token owner.
-	# * @param mint_timestamp The mint timestamp.
-	struct TokenData:
-      	    member owner : felt
-	    member mint_timestamp : felt
-	end
-end
+	// * @notice Contains the owner address and the mint timestamp for every NFT.
+	// *
+	// * Note: Instead of the owner address in the _tokenOwners private mapping, we now store it in the
+	// * _tokenData mapping, alongside the unchanging mintTimestamp.
+	// *
+	// * @param owner The token owner.
+	// * @param mint_timestamp The mint timestamp.
+	struct TokenData {
+      	    owner : felt,
+	    mint_timestamp : felt,
+	}
+}

@@ -21,119 +21,117 @@ from libraries.InteractionLogic import InteractionLogic
 from core.base.ERC721Time import ERC721Time
 
 
-#
-# Storage
-#
+//
+// Storage
+//
 
 @storage_var
-func profile_counter() -> (number: Uint256):
-end
+func profile_counter() -> (number: Uint256) {
+}
 
 @storage_var
-func follow_nft() -> (address: felt):
-end
-#
-# Events
-#
+func follow_nft() -> (address: felt) {
+}
+//
+// Events
+//
 
 @event
-func BaseInitialized(name : felt, symbol : felt, timestamp : felt):
-end
+func BaseInitialized(name : felt, symbol : felt, timestamp : felt) {
+}
 
 
-func felt_to_uint256{range_check_ptr}(x) -> (x_ : Uint256):
-    let split = split_felt(x)
-    return (Uint256(low=split.low, high=split.high))
-end
+func felt_to_uint256{range_check_ptr}(x) -> Uint256 {
+    let split = split_felt(x);
+    return (Uint256(low=split.low, high=split.high));
+}
 
 
-namespace ZKGraphHub:
+@constructor
+func constructor{
+    syscall_ptr: felt*,
+    pedersen_ptr: HashBuiltin*,
+    range_check_ptr
+}(name : felt, symbol : felt, owner : felt, _follow_nft: felt, token_uri_len: felt, token_uri: felt*) {
+    ERC721Time.initialize(name, symbol, owner, token_uri_len, token_uri);
+    let profile_cnt : Uint256 = felt_to_uint256(0);
+    profile_counter.write(profile_cnt);
+    follow_nft.write(_follow_nft);
+    return();
+}
+
     
-    @constructor
-    func constructor{
-	syscall_ptr: felt*,
-	pedersen_ptr: HashBuiltin*,
-	range_check_ptr
-    }(name : felt, symbol : felt, owner : felt, _follow_nft: felt, token_uri_len: felt, token_uri: felt*):
-	ERC721Time.initialize(name, symbol, owner, token_uri_len, token_uri)
-        let (profile_cnt : Uint256) = felt_to_uint256(0)
-        profile_counter.write(profile_cnt)
-        follow_nft.write(_follow_nft)
-        return()
-    end
+func get_profile_counter{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }() -> Uint256 {
+    let number : Uint256 = profile_counter.read();
+    return (number);
+}
 
-    func get_profile_counter{
-            syscall_ptr : felt*,
-            pedersen_ptr : HashBuiltin*,
-            range_check_ptr
-        }() -> (number : Uint256):
-        let (number) = profile_counter.read()
-        return (number)
-    end
+////// Profile Owner Functions //////
+@external
+func create_profile{
+    syscall_ptr: felt*,
+    pedersen_ptr: HashBuiltin*,
+    range_check_ptr,
+    bitwise_ptr : BitwiseBuiltin*
+}(create_profile_data : DataTypes.CreateProfileData) -> (profile_id : Uint256) {
+    alloc_locals;
+    let _profile_counter : Uint256 = profile_counter.read();
+    let profile_id : Uint256 = SafeUint256.add(_profile_counter, Uint256(1, 0));
+    let caller: felt = get_caller_address();
+    ERC721Time.mint(caller, profile_id);
+    PublishingLogic.create_profile(create_profile_data, profile_id, 0);
+    profile_counter.write(profile_id);
+    return (profile_id=profile_id);
+}
 
-    ### Profile Owner Functions ###
-    @external
-    func create_profile{
-	syscall_ptr: felt*,
-	pedersen_ptr: HashBuiltin*,
-	range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*
-    }(create_profile_data : DataTypes.CreateProfileData) -> (profile_id : Uint256): 
-        alloc_locals
-        let (_profile_counter : Uint256) = profile_counter.read()
-	let (profile_id : Uint256) = SafeUint256.add(_profile_counter, Uint256(1, 0))
-        let (caller: felt) = get_caller_address()
-	ERC721Time.mint(caller, profile_id)
-	PublishingLogic.create_profile(create_profile_data, profile_id, 0)
-        profile_counter.write(profile_id)
-	return (profile_id)
-    end  
+@external
+func transferFrom{
+    syscall_ptr: felt*,
+    pedersen_ptr: HashBuiltin*,
+    range_check_ptr,
+}(_from: felt, to: felt, token_id: Uint256) {
+    let ownerOf: felt = ERC721.owner_of(token_id);
+    with_attr error_message("From != owner of token") {
+        assert ownerOf = _from;
+    }
+    ERC721Time.transferFrom(_from, to, token_id);
+    return();
+}
+//func set_follow_module
 
-    @external
-    func transferFrom{
-            syscall_ptr: felt*,
-            pedersen_ptr: HashBuiltin*,
-            range_check_ptr,
-        }(_from: felt, to: felt, token_id: Uint256):
-        let (ownerOf: felt) = ERC721.owner_of(token_id)
-        with_attr error_message("From != owner of token"):
-            assert ownerOf = _from
-        end
-        ERC721Time.transferFrom(_from, to, token_id)
-        return()
-    end
-    #func set_follow_module
-
-    @external
-    func approve{
-            syscall_ptr: felt*,
-            pedersen_ptr: HashBuiltin*,
-            range_check_ptr,
-        }(to: felt, token_id: Uint256):
-        ERC721Time.approve(to, token_id)
-        return()
-    end
+@external
+func approve{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr,
+    }(to: felt, token_id: Uint256) {
+    ERC721Time.approve(to, token_id);
+    return();
+}
 	
-    @external
-    func setApprovalForAll{
-            syscall_ptr: felt*,
-            pedersen_ptr: HashBuiltin*,
-            range_check_ptr,
-        }(operator: felt, approved: felt):
-        ERC721Time.setApprovalForAll(operator, approved)
-        return()
-    end
+@external
+func setApprovalForAll{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr,
+    }(operator: felt, approved: felt) {
+    ERC721Time.setApprovalForAll(operator, approved);
+    return();
+}
 
-    @external
-    func follow{
-            syscall_ptr: felt*,
-            pedersen_ptr: HashBuiltin*,
-            range_check_ptr,
-            bitwise_ptr : BitwiseBuiltin*
-        }(profile_id: Uint256):
-        let (sender: felt) = get_caller_address()
-        let (_follow_nft: felt) = follow_nft.read()
-        InteractionLogic.follow(sender, profile_id, 0, _follow_nft)
-        return ()
-    end
-end
+@external
+func follow{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr : BitwiseBuiltin*
+    }(profile_id: Uint256) {
+    let sender: felt = get_caller_address();
+    let _follow_nft: felt = follow_nft.read();
+    InteractionLogic.follow(sender, profile_id, 0, _follow_nft);
+    return ();
+}
